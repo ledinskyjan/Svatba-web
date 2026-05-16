@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR kód pro tisk fotek — Martina &amp; Honza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #faf8f3;
+            --text: #2d2d2d;
+            --muted: #6e6a63;
+            --accent: #8a9a7b;
+            --line: #d8d2c5;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            color: var(--text);
+            background: #ddd;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            font-weight: 300;
+        }
+
+        .card {
+            width: 148mm;
+            min-height: 210mm;       /* A5 portrait */
+            background: var(--bg);
+            padding: 22mm 18mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 8mm; left: 8mm; right: 8mm; bottom: 8mm;
+            border: 1px solid var(--line);
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 2.8rem;
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+        }
+        h1 .amp { font-style: italic; color: var(--accent); }
+
+        .date {
+            font-family: 'Cormorant Garamond', serif;
+            letter-spacing: 0.3em;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .divider {
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+            margin: 0 auto 2rem;
+        }
+
+        .qr-wrap {
+            padding: 1rem;
+            background: white;
+            border: 1px solid var(--line);
+            margin-bottom: 1.5rem;
+        }
+        #qr canvas, #qr img { display: block; }
+
+        .url {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.15em;
+            color: var(--text);
+            margin-bottom: 2rem;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--muted);
+            max-width: 100mm;
+        }
+
+        .instructions strong {
+            display: block;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-note {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* Tisk: skryj okraje obrazovky */
+        @media print {
+            body { background: white; padding: 0; }
+            .card { box-shadow: none; width: 100%; min-height: 100vh; }
+        }
+
+        @page {
+            size: A5;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <p class="eyebrow">Vyfoťte, nahrajte, vytiskněte</p>
+        <h1>Martina <span class="amp">&amp;</span> Honza</h1>
+        <p class="date">20 &middot; 06 &middot; 2026</p>
+
+        <div class="divider"></div>
+
+        <div class="qr-wrap">
+            <div id="qr"></div>
+        </div>
+
+        <p class="url">ledinskych.cz</p>
+
+        <div class="instructions">
+            <strong>Sdílej s námi vzpomínku</strong>
+            Naskenuj QR kód telefonem, nahraj fotku z dnešního dne — a my ji rovnou vytiskneme na polaroidovou tiskárnu. Můžeš si ji odnést domů.
+        </div>
+
+        <p class="footer-note">Děkujeme, že jste s námi</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // URL, kam má QR kód vést (odkazuje rovnou na sekci s uploadem)
+        const TARGET_URL = 'https://ledinskych.cz/#fotky';
+
+        QRCode.toCanvas(
+            document.getElementById('qr'),
+            TARGET_URL,
+            {
+                width: 320,
+                margin: 1,
+                errorCorrectionLevel: 'H',
+                color: {
+                    dark: '#2d2d2d',
+                    light: '#ffffff',
+                },
+            },
+            err => { if (err) console.error(err); }
+        );
+    </script>
+</body>
+</html>
