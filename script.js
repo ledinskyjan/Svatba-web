@@ -9,8 +9,8 @@
      2. Settings → Upload → Add upload preset → zvol "Unsigned" → zkopíruj název
      3. Dosaď oba sem dolů a ulož.
 */
-const CLOUDINARY_CLOUD_NAME = 'TVUJ_CLOUD_NAME';
-const CLOUDINARY_UPLOAD_PRESET = 'TVUJ_UPLOAD_PRESET';
+const CLOUDINARY_CLOUD_NAME = 'dyzskaaco';
+const CLOUDINARY_UPLOAD_PRESET = 'svatba';
 const CLOUDINARY_FOLDER = 'svatba-martina-honza'; // do tohoto folderu se budou fotky řadit
 /* ---------------------------------------------- */
 

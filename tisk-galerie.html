@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tisková galerie — Martina & Honza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #faf8f3;
+            --bg-alt: #f2efe7;
+            --text: #2d2d2d;
+            --muted: #6e6a63;
+            --accent: #8a9a7b;
+            --accent-dark: #6e7e5f;
+            --line: #d8d2c5;
+            --green: #6e7e5f;
+            --rose: #c08a82;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Lato', sans-serif;
+            font-weight: 300;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+        header.top {
+            position: sticky;
+            top: 0;
+            background: rgba(250,248,243,0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--line);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10;
+        }
+        .title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            letter-spacing: 0.1em;
+        }
+        .meta {
+            font-size: 0.85rem;
+            color: var(--muted);
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .meta strong { color: var(--text); font-weight: 700; }
+        .filter-bar {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--line);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        .filter-btn.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+        main {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .card {
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card.printed { opacity: 0.5; }
+        .card-img-wrap {
+            position: relative;
+            background: var(--bg-alt);
+            aspect-ratio: 1;
+            overflow: hidden;
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--green);
+            color: white;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .card-time {
+            padding: 0.6rem 0.8rem 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .card-actions {
+            padding: 0.5rem 0.8rem 0.8rem;
+            display: flex;
+            gap: 0.4rem;
+        }
+        .btn {
+            flex: 1;
+            padding: 0.6rem 0.5rem;
+            font-family: inherit;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            border: 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-print {
+            background: var(--text);
+            color: var(--bg);
+            font-weight: 700;
+        }
+        .btn-print:hover { background: var(--green); }
+        .btn-secondary {
+            background: var(--bg-alt);
+            color: var(--text);
+            border: 1px solid var(--line);
+        }
+        .btn-secondary:hover { background: var(--line); }
+        .empty, .loading, .error {
+            text-align: center;
+            padding: 5rem 1rem;
+            color: var(--muted);
+        }
+        .empty .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+        .error { color: var(--rose); }
+        .login {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .login h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+        }
+        .login input {
+            padding: 0.9rem 1rem;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            width: 240px;
+            margin-bottom: 0.8rem;
+            background: white;
+        }
+        .login button {
+            padding: 0.9rem 2rem;
+            background: var(--text);
+            color: var(--bg);
+            border: 0;
+            border-radius: 4px;
+            font-family: inherit;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(120%);
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: transform 0.4s;
+            z-index: 20;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        @media (max-width: 600px) {
+            header.top { flex-direction: column; align-items: flex-start; }
+            .gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login overlay -->
+    <div id="login" class="login" style="display:none;">
+        <h1>Tisková galerie</h1>
+        <p style="color: var(--muted); margin-bottom: 1rem;">Pouze pro obsluhu tiskárny.</p>
+        <input id="login-input" type="password" placeholder="Heslo" autocomplete="off">
+        <button onclick="checkPassword()">Pokračovat</button>
+    </div>
+
+    <!-- App -->
+    <div id="app" style="display:none;">
+        <header class="top">
+            <div>
+                <div class="title">Tisková galerie</div>
+                <div class="meta">
+                    <span><strong id="count-total">0</strong> celkem</span>
+                    <span><strong id="count-pending">0</strong> k tisku</span>
+                    <span><strong id="count-printed">0</strong> vytisknuto</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="pending">K tisku</button>
+            <button class="filter-btn" data-filter="all">Všechny</button>
+            <button class="filter-btn" data-filter="printed">Vytisknuté</button>
+            <button class="filter-btn" data-filter="reset" onclick="resetPrinted()" style="margin-left:auto;">↺ Vymazat historii tisku</button>
+        </div>
+
+        <main>
+            <div id="status" class="loading">Načítám galerii…</div>
+            <div id="gallery" class="gallery"></div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+    /* ============ KONFIGURACE — uprav podle Cloudinary ============ */
+    const CLOUDINARY_CLOUD_NAME = 'dyzskaaco';
+    const CLOUDINARY_TAG = 'svatba-martina-honza';   // tag, kterým upload preset označí každou fotku
+    const PASSWORD = 'martina2026';                  // heslo pro přístup do galerie
+    const REFRESH_INTERVAL = 10000;                  // jak často kontrolovat nové fotky (ms)
+    /* ================================================================ */
+
+    let allPhotos = [];
+    let currentFilter = 'pending';
+
+    function getPrinted() {
+        try { return new Set(JSON.parse(localStorage.getItem('printed') || '[]')); }
+        catch { return new Set(); }
+    }
+    function savePrinted(set) {
+        localStorage.setItem('printed', JSON.stringify([...set]));
+    }
+    function markPrinted(id) {
+        const s = getPrinted(); s.add(id); savePrinted(s);
+    }
+    function unmarkPrinted(id) {
+        const s = getPrinted(); s.delete(id); savePrinted(s);
+    }
+
+    function checkPassword() {
+        const input = document.getElementById('login-input').value;
+        if (input === PASSWORD) {
+            sessionStorage.setItem('auth', '1');
+            showApp();
+        } else {
+            alert('Špatné heslo.');
+        }
+    }
+    document.getElementById('login-input')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') checkPassword();
+    });
+
+    function showLogin() {
+        document.getElementById('login').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+    }
+    function showApp() {
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadGallery();
+        setInterval(loadGallery, REFRESH_INTERVAL);
+    }
+
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    async function loadGallery() {
+        if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === 'TVUJ_CLOUD_NAME') {
+            document.getElementById('status').className = 'error';
+            document.getElementById('status').textContent = 'Cloudinary není nakonfigurovaný — uprav CLOUDINARY_CLOUD_NAME v souboru tisk-galerie.html.';
+            return;
+        }
+        try {
+            const url = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/list/${CLOUDINARY_TAG}.json?t=${Date.now()}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            allPhotos = (data.resources || []).sort((a, b) =>
+                new Date(b.created_at) - new Date(a.created_at)
+            );
+            render();
+        } catch (err) {
+            console.error(err);
+            document.getElementById('status').className = 'error';
+            document.getElementById('status').textContent =
+                'Nepodařilo se načíst galerii. Zkontroluj, že je v Cloudinary povolen "Resource list" (viz NAVOD.md, krok 2c) a že fotky mají tag "' + CLOUDINARY_TAG + '".';
+        }
+    }
+
+    function render() {
+        const printed = getPrinted();
+        const total = allPhotos.length;
+        const printedCount = allPhotos.filter(p => printed.has(p.public_id)).length;
+        const pendingCount = total - printedCount;
+
+        document.getElementById('count-total').textContent = total;
+        document.getElementById('count-pending').textContent = pendingCount;
+        document.getElementById('count-printed').textContent = printedCount;
+
+        let photos = allPhotos;
+        if (currentFilter === 'pending') photos = allPhotos.filter(p => !printed.has(p.public_id));
+        else if (currentFilter === 'printed') photos = allPhotos.filter(p => printed.has(p.public_id));
+
+        const gallery = document.getElementById('gallery');
+        const status = document.getElementById('status');
+
+        if (total === 0) {
+            status.className = 'empty';
+            status.innerHTML = '<div class="icon">📷</div>Zatím žádné fotky.<br>Až někdo nahraje, objeví se tady.';
+            gallery.innerHTML = '';
+            return;
+        }
+        if (photos.length === 0) {
+            status.className = 'empty';
+            status.innerHTML = currentFilter === 'pending'
+                ? '<div class="icon">✓</div>Všechno vytisknuté.'
+                : 'Žádné fotky v této kategorii.';
+            gallery.innerHTML = '';
+            return;
+        }
+
+        status.textContent = '';
+        status.className = '';
+        gallery.innerHTML = photos.map(p => {
+            const isPrinted = printed.has(p.public_id);
+            const time = new Date(p.created_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+            const date = new Date(p.created_at).toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit' });
+            const thumbUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/w_400,h_400,c_fill,q_auto,f_auto/${p.public_id}.${p.format}`;
+            const fullUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/q_90,f_jpg/${p.public_id}.jpg`;
+            return `
+                <div class="card ${isPrinted ? 'printed' : ''}">
+                    <div class="card-img-wrap">
+                        <img src="${thumbUrl}" alt="" loading="lazy">
+                        ${isPrinted ? '<div class="card-badge">Tisk OK</div>' : ''}
+                    </div>
+                    <div class="card-time">${date} · ${time}</div>
+                    <div class="card-actions">
+                        ${isPrinted
+                            ? `<button class="btn btn-secondary" onclick="reprint('${p.public_id}','${fullUrl}','${p.format}')">Tisk znovu</button>`
+                            : `<button class="btn btn-print" onclick="printPhoto('${p.public_id}','${fullUrl}','${p.format}')">Sdílet → Instax</button>`
+                        }
+                        <a class="btn btn-secondary" href="${fullUrl}" download="${p.public_id}.jpg" target="_blank">⤓</a>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function printPhoto(id, url, format) {
+        try {
+            // Stáhneme fotku jako blob
+            const res = await fetch(url);
+            const blob = await res.blob();
+            const file = new File([blob], `svatba-${id}.${format || 'jpg'}`, { type: blob.type });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'Svatební fotka',
+                });
+                markPrinted(id);
+                toast('Sdíleno. Po vytištění je fotka označená.');
+                render();
+            } else {
+                // Fallback — stáhne fotku, uživatel jí otevře v Instax appce ručně
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = file.name;
+                a.click();
+                URL.revokeObjectURL(a.href);
+                markPrinted(id);
+                toast('Tento prohlížeč neumí přímé sdílení — fotku jsem stáhl, otevři ji v Instax appce.');
+                render();
+            }
+        } catch (err) {
+            console.error(err);
+            if (err.name !== 'AbortError') {
+                toast('Sdílení se nepovedlo: ' + err.message);
+            }
+        }
+    }
+
+    function reprint(id, url, format) {
+        if (confirm('Opravdu znovu vytisknout?')) {
+            unmarkPrinted(id);
+            printPhoto(id, url, format);
+        }
+    }
+
+    function resetPrinted() {
+        if (confirm('Vymazat historii tisku? Žádná fotka se nevymaže, jen označení "vytisknuto" zmizí.')) {
+            localStorage.removeItem('printed');
+            render();
+            toast('Historie tisku vymazána.');
+        }
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.dataset.filter === 'reset') return;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            render();
+        });
+    });
+
+    // Init: check auth
+    if (sessionStorage.getItem('auth') === '1') {
+        showApp();
+    } else {
+        showLogin();
+    }
+    </script>
+</body>
+</html>
