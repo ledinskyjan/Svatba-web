@@ -127,10 +127,10 @@ img { max-width: 100%; height: auto; display: block; }
     padding: 5rem 1.5rem 3rem;
     position: relative;
     background-color: var(--color-bg);
-    background-image: url('flowers.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-image: url('flowers-left.jpg'), url('flowers-right.jpg');
+    background-position: left center, right center;
+    background-repeat: no-repeat, no-repeat;
+    background-size: auto 90%, auto 90%;
 }
 
 .hero-content {
@@ -141,8 +141,8 @@ img { max-width: 100%; height: auto; display: block; }
 
 @media (max-width: 720px) {
     .hero {
-        background-size: 200% auto;
-        background-position: center 80%;
+        background-size: auto 45%, auto 45%;
+        background-position: left bottom, right bottom;
     }
 }
 
