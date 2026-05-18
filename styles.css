@@ -126,19 +126,11 @@ img { max-width: 100%; height: auto; display: block; }
     text-align: center;
     padding: 5rem 1.5rem 3rem;
     position: relative;
-    background:
-        radial-gradient(ellipse at 50% 30%, rgba(138, 154, 123, 0.08) 0%, transparent 60%),
-        var(--color-bg);
-}
-
-.hero-flowers {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.95;
-    pointer-events: none;
-    z-index: 0;
+    background-color: var(--color-bg);
+    background-image: url('flowers.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .hero-content {
@@ -148,7 +140,10 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 @media (max-width: 720px) {
-    .hero-flowers { opacity: 0.75; }
+    .hero {
+        background-size: 200% auto;
+        background-position: center 80%;
+    }
 }
 
 .hero-eyebrow,

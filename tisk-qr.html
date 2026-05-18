@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR kód pro tisk fotek — Martina &amp; Honza</title>
+    <title>QR kód pro tisk fotek — Martina & Honza</title>
+
+    <!-- Google Fonts (v1 API s explicitními subsety pro českou diakritiku) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cormorant+Garamond:300,400,500&subset=latin,latin-ext&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin,latin-ext&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -20,7 +23,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Lato', sans-serif;
+            font-family: 'Lato', 'Segoe UI', Tahoma, Verdana, sans-serif;
             color: var(--text);
             background: #ddd;
             padding: 2rem;
@@ -31,7 +34,7 @@
 
         .card {
             width: 148mm;
-            min-height: 210mm;       /* A5 portrait */
+            min-height: 210mm;
             background: var(--bg);
             padding: 22mm 18mm;
             display: flex;
@@ -41,7 +44,6 @@
             position: relative;
             box-shadow: 0 10px 40px rgba(0,0,0,0.15);
         }
-
         .card::before {
             content: '';
             position: absolute;
@@ -57,9 +59,8 @@
             color: var(--muted);
             margin-bottom: 1.5rem;
         }
-
         h1 {
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
             font-weight: 300;
             font-size: 2.8rem;
             line-height: 1.1;
@@ -68,7 +69,7 @@
         h1 .amp { font-style: italic; color: var(--accent); }
 
         .date {
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
             letter-spacing: 0.3em;
             color: var(--muted);
             margin-bottom: 2rem;
@@ -87,10 +88,11 @@
             border: 1px solid var(--line);
             margin-bottom: 1.5rem;
         }
-        #qr canvas, #qr img { display: block; }
+        #qr { display: block; width: 320px; height: 320px; }
+        #qr img, #qr canvas { display: block; margin: 0 auto; }
 
         .url {
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
             font-size: 1.1rem;
             letter-spacing: 0.15em;
             color: var(--text);
@@ -103,10 +105,9 @@
             color: var(--muted);
             max-width: 100mm;
         }
-
         .instructions strong {
             display: block;
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
             font-size: 1.4rem;
             font-weight: 500;
             color: var(--text);
@@ -122,16 +123,18 @@
             color: var(--muted);
         }
 
-        /* Tisk: skryj okraje obrazovky */
+        .error {
+            color: #a04a4a;
+            font-size: 0.9rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
         @media print {
             body { background: white; padding: 0; }
             .card { box-shadow: none; width: 100%; min-height: 100vh; }
         }
-
-        @page {
-            size: A5;
-            margin: 0;
-        }
+        @page { size: A5; margin: 0; }
     </style>
 </head>
 <body>
@@ -150,32 +153,40 @@
         <p class="url">ledinskych.cz</p>
 
         <div class="instructions">
-            <strong>Sdílej s námi vzpomínku</strong>
-            Naskenuj QR kód telefonem, nahraj fotku z dnešního dne — a my ji rovnou vytiskneme na polaroidovou tiskárnu. Můžeš si ji odnést domů.
+            <strong>Sdílejte s námi vzpomínku</strong>
+            Naskenujte QR kód telefonem, nahrajte fotku z dnešního dne — a my ji rovnou vytiskneme na polaroidovou tiskárnu. Můžete si ji odnést domů.
         </div>
 
         <p class="footer-note">Děkujeme, že jste s námi</p>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- Spolehlivá QR knihovna (davidshimjs/qrcodejs) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        // URL, kam má QR kód vést (odkazuje rovnou na sekci s uploadem)
         const TARGET_URL = 'https://ledinskych.cz/#fotky';
 
-        QRCode.toCanvas(
-            document.getElementById('qr'),
-            TARGET_URL,
-            {
+        function drawQR() {
+            const container = document.getElementById('qr');
+            container.innerHTML = '';
+            if (typeof QRCode === 'undefined') {
+                container.innerHTML = '<p class="error">QR knihovna se nenačetla. Zkontroluj připojení k internetu a refreshni stránku.</p>';
+                return;
+            }
+            new QRCode(container, {
+                text: TARGET_URL,
                 width: 320,
-                margin: 1,
-                errorCorrectionLevel: 'H',
-                color: {
-                    dark: '#2d2d2d',
-                    light: '#ffffff',
-                },
-            },
-            err => { if (err) console.error(err); }
-        );
+                height: 320,
+                colorDark: '#2d2d2d',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H,
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', drawQR);
+        } else {
+            drawQR();
+        }
     </script>
 </body>
 </html>
