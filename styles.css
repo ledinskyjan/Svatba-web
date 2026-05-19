@@ -127,7 +127,7 @@ img { max-width: 100%; height: auto; display: block; }
     padding: 5rem 1.5rem 3rem;
     position: relative;
     background-color: var(--color-bg);
-    background-image: url('flowers-left.jpg'), url('flowers-right.jpg');
+    background-image: url('flowers-left.webp'), url('flowers-right.webp');
     background-position: left center, right center;
     background-repeat: no-repeat, no-repeat;
     background-size: auto 90%, auto 90%;
@@ -141,7 +141,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 @media (max-width: 720px) {
     .hero {
-        background-size: auto 45%, auto 45%;
+        background-size: auto 50%, auto 50%;
         background-position: left bottom, right bottom;
     }
 }
