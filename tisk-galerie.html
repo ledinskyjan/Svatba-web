@@ -425,16 +425,17 @@ canvas { position:fixed; top:0; left:0; width:100%; height:100%; }
     c.height = ch;
     var ctx = c.getContext('2d');
     var W = img.naturalWidth, H = img.naturalHeight;
-    // Po a_exif transformaci: portrait = H > W, landscape = W > H
+    // Po a_exif transformaci: portrait = H > W, landscape = W >= H
+    // Vždy Math.min = contain: celá fotka vidět, černé pruhy kde zbyde místo
     if (H > W) {
-      // Portrétní fotka — otočíme o 90° aby zaplnila landscape INSTAX Wide
-      var sc = Math.max(cw/H, ch/W);
+      // Portrétní fotka — otočíme o 90° do landscape, pak contain
+      var sc = Math.min(cw/H, ch/W);
       ctx.translate(cw/2, ch/2);
       ctx.rotate(Math.PI/2);
       ctx.drawImage(img, -W*sc/2, -H*sc/2, W*sc, H*sc);
     } else {
-      // Krajinná fotka — rovnou zaplní
-      var sc = Math.max(cw/W, ch/H);
+      // Krajinná fotka — contain v landscape canvas
+      var sc = Math.min(cw/W, ch/H);
       ctx.drawImage(img, (cw-W*sc)/2, (ch-H*sc)/2, W*sc, H*sc);
     }
     URL.revokeObjectURL('${objectUrl}');
