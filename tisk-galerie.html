@@ -391,35 +391,45 @@
 
     async function printPhoto(id, url, format) {
         try {
-            // Stáhneme fotku jako blob
             const res = await fetch(url);
             const blob = await res.blob();
-            const file = new File([blob], `svatba-${id}.${format || 'jpg'}`, { type: blob.type });
+            const objectUrl = URL.createObjectURL(blob);
 
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: 'Svatební fotka',
-                });
-                markPrinted(id);
-                toast('Sdíleno. Po vytištění je fotka označená.');
-                render();
-            } else {
-                // Fallback — stáhne fotku, uživatel jí otevře v Instax appce ručně
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = file.name;
-                a.click();
-                URL.revokeObjectURL(a.href);
-                markPrinted(id);
-                toast('Tento prohlížeč neumí přímé sdílení — fotku jsem stáhl, otevři ji v Instax appce.');
-                render();
-            }
+            // Otevře čisté okno s fotkou a spustí tiskový dialog.
+            // Na desktopu stačí vybrat INSTAX tiskárnu; na mobilu funguje standardní tisk.
+            const win = window.open('', '_blank', 'width=900,height=700');
+            win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tisk fotky</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #fff; }
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  @media print {
+    html, body { width: 100%; height: 100%; margin: 0; }
+    img { width: 100%; height: 100%; object-fit: cover; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<img src="${objectUrl}" onload="window.print(); window.onafterprint = () => { window.close(); URL.revokeObjectURL('${objectUrl}'); }">
+</body>
+</html>`);
+            win.document.close();
+
+            markPrinted(id);
+            toast('Otevřen tiskový dialog — vyber INSTAX tiskárnu.');
+            render();
         } catch (err) {
             console.error(err);
-            if (err.name !== 'AbortError') {
-                toast('Sdílení se nepovedlo: ' + err.message);
-            }
+            toast('Chyba při přípravě tisku: ' + err.message);
         }
     }
 
