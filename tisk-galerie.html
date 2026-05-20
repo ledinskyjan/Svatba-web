@@ -391,58 +391,60 @@
 
     async function printPhoto(id, url, format) {
         try {
-            const res = await fetch(url);
+            // a_exif: Cloudinary fyzicky otočí fotku podle EXIF před stažením
+            // Tím naturalWidth/Height odpovídají skutečné orientaci — žádné záhady s EXIF
+            const printUrl = url.replace('/upload/', '/upload/a_exif/');
+
+            const res = await fetch(printUrl);
             const blob = await res.blob();
             const objectUrl = URL.createObjectURL(blob);
 
-            // INSTAX Wide tiskne na šířku (landscape: 99 × 62 mm = 3.9 × 2.4 in).
-            // Portrétní fotky (výška > šířka) otočíme o 90° přes canvas, krajinné necháme.
-            // Canvas má 800 × 500 px (≈200 DPI) — dostatek rozlišení pro INSTAX tisk.
             const win = window.open('', '_blank', 'width=900,height=700');
             win.document.write(`<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title></title>
+<title>​</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  @page { margin: 0mm; }
-  html, body {
-    margin: 0; padding: 0;
-    width: 100%; height: 100%;
-    overflow: hidden;
-    background: #000;
-  }
-  /* Krajinná fotka — zaplní celou plochu */
-  img.fit-land {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-  /* Portrétní fotka — otočíme o 90° a zaplníme landscape plochu */
-  img.fit-port {
-    position: fixed;
-    top: 50%; left: 50%;
-    width: 100vh;
-    height: 100vw;
-    transform: translate(-50%, -50%) rotate(90deg);
-    object-fit: cover;
-  }
+* { margin:0; padding:0; box-sizing:border-box; }
+@page { margin:0; }
+html,body { width:100%; height:100%; overflow:hidden; background:#000; }
+canvas { position:fixed; top:0; left:0; width:100%; height:100%; }
 </style>
 </head>
 <body>
-<img id="p" src="${objectUrl}">
+<canvas id="c"></canvas>
 <script>
-const img = document.getElementById('p');
-img.onload = function() {
-  img.className = img.naturalHeight > img.naturalWidth ? 'fit-port' : 'fit-land';
-  URL.revokeObjectURL('${objectUrl}');
-  setTimeout(function() {
-    window.print();
-    window.onafterprint = function() { window.close(); };
-  }, 400);
-};
+(function(){
+  var img = new Image();
+  img.onload = function(){
+    var cw = window.innerWidth  || 900;
+    var ch = window.innerHeight || 700;
+    var c  = document.getElementById('c');
+    c.width  = cw;
+    c.height = ch;
+    var ctx = c.getContext('2d');
+    var W = img.naturalWidth, H = img.naturalHeight;
+    // Po a_exif transformaci: portrait = H > W, landscape = W > H
+    if (H > W) {
+      // Portrétní fotka — otočíme o 90° aby zaplnila landscape INSTAX Wide
+      var sc = Math.max(cw/H, ch/W);
+      ctx.translate(cw/2, ch/2);
+      ctx.rotate(Math.PI/2);
+      ctx.drawImage(img, -W*sc/2, -H*sc/2, W*sc, H*sc);
+    } else {
+      // Krajinná fotka — rovnou zaplní
+      var sc = Math.max(cw/W, ch/H);
+      ctx.drawImage(img, (cw-W*sc)/2, (ch-H*sc)/2, W*sc, H*sc);
+    }
+    URL.revokeObjectURL('${objectUrl}');
+    setTimeout(function(){
+      window.print();
+      window.onafterprint = function(){ window.close(); };
+    }, 400);
+  };
+  img.src = '${objectUrl}';
+})();
 <\/script>
 </body>
 </html>`);
