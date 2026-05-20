@@ -403,55 +403,46 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Tisk fotky</title>
+<title></title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; background: #fff; }
-  canvas { display: block; width: 100%; height: 100%; }
-  @page { size: 3.9in 2.4in landscape; margin: 0; }
-  @media print {
-    html, body { width: 3.9in; height: 2.4in; margin: 0; }
-    canvas { width: 3.9in; height: 2.4in; display: block; }
+  @page { margin: 0mm; }
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+  }
+  /* Krajinná fotka — zaplní celou plochu */
+  img.fit-land {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  /* Portrétní fotka — otočíme o 90° a zaplníme landscape plochu */
+  img.fit-port {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 100vh;
+    height: 100vw;
+    transform: translate(-50%, -50%) rotate(90deg);
+    object-fit: cover;
   }
 </style>
 </head>
 <body>
-<canvas id="c" width="800" height="500"></canvas>
+<img id="p" src="${objectUrl}">
 <script>
-const img = new Image();
+const img = document.getElementById('p');
 img.onload = function() {
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
-  const CW = canvas.width;   // 800
-  const CH = canvas.height;  // 500
-  // Prohlížeč načte img s EXIF orientací — naturalWidth/Height jsou po otočení.
-  const isPortrait = img.naturalHeight > img.naturalWidth;
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, CW, CH);
-  if (isPortrait) {
-    // Portrétní fotka: otočíme o 90° (CW rotace) aby zaplnila landscape plochu
-    ctx.save();
-    ctx.translate(CW / 2, CH / 2);
-    ctx.rotate(Math.PI / 2);
-    const scale = Math.max(CW / img.naturalHeight, CH / img.naturalWidth);
-    const dw = img.naturalWidth * scale;
-    const dh = img.naturalHeight * scale;
-    ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
-    ctx.restore();
-  } else {
-    // Krajinná fotka: rovnou zaplní landscape plochu
-    const scale = Math.max(CW / img.naturalWidth, CH / img.naturalHeight);
-    const dw = img.naturalWidth * scale;
-    const dh = img.naturalHeight * scale;
-    ctx.drawImage(img, (CW - dw) / 2, (CH - dh) / 2, dw, dh);
-  }
+  img.className = img.naturalHeight > img.naturalWidth ? 'fit-port' : 'fit-land';
   URL.revokeObjectURL('${objectUrl}');
-  setTimeout(() => {
+  setTimeout(function() {
     window.print();
-    window.onafterprint = () => window.close();
-  }, 300);
+    window.onafterprint = function() { window.close(); };
+  }, 400);
 };
-img.src = '${objectUrl}';
 </script>
 </body>
 </html>`);
