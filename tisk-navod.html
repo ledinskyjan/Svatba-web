@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jak si vytisknout fotku — Martina & Honza</title>
+
+    <!-- Self-hosted fonty (kompletní podpora české diakritiky) -->
+    <link rel="stylesheet" href="fonts.css?v=2">
+
+    <style>
+        :root {
+            --bg: #faf8f3;
+            --text: #2d2d2d;
+            --muted: #6e6a63;
+            --accent: #8a9a7b;
+            --accent-dark: #6e7e5f;
+            --line: #d8d2c5;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Open Sans', 'Segoe UI', Tahoma, Verdana, sans-serif;
+            color: var(--text);
+            background: #ddd;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            font-weight: 300;
+        }
+
+        .card {
+            width: 148mm;
+            min-height: 210mm;
+            background: var(--bg);
+            padding: 18mm 17mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 8mm; left: 8mm; right: 8mm; bottom: 8mm;
+            border: 1px solid var(--line);
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-family: 'Crimson Pro', 'Times New Roman', Georgia, serif;
+            font-weight: 300;
+            font-size: 2.6rem;
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+        }
+        h1 .amp { font-style: italic; color: var(--accent); }
+
+        .date {
+            font-family: 'Crimson Pro', 'Times New Roman', Georgia, serif;
+            letter-spacing: 0.3em;
+            color: var(--muted);
+            margin-bottom: 1.1rem;
+        }
+
+        .divider {
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+            margin: 0 auto 1.1rem;
+        }
+
+        .lead {
+            font-family: 'Crimson Pro', 'Times New Roman', Georgia, serif;
+            font-size: 1.7rem;
+            font-weight: 500;
+            line-height: 1.2;
+            margin-bottom: 1.3rem;
+        }
+
+        .steps {
+            list-style: none;
+            counter-reset: step;
+            width: 100%;
+            max-width: 104mm;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .steps li {
+            counter-increment: step;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .steps li::before {
+            content: counter(step);
+            flex: 0 0 auto;
+            width: 2.2rem;
+            height: 2.2rem;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Crimson Pro', 'Times New Roman', Georgia, serif;
+            font-size: 1.2rem;
+            color: var(--accent-dark);
+        }
+        .steps .s-title {
+            display: block;
+            font-family: 'Crimson Pro', 'Times New Roman', Georgia, serif;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.25;
+            margin-bottom: 0.15rem;
+        }
+        .steps .s-desc {
+            font-size: 0.92rem;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+        .steps .s-desc strong { color: var(--accent-dark); font-weight: 600; }
+
+        .note {
+            margin-top: 0.4rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--muted);
+            max-width: 104mm;
+        }
+
+        .footer-note {
+            margin-top: auto;
+            padding-top: 1.2rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .card { box-shadow: none; width: 100%; min-height: 100vh; }
+        }
+        @page { size: A5; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <p class="eyebrow">Fotka na památku</p>
+        <h1>Martina <span class="amp">&amp;</span> Honza</h1>
+        <p class="date">20 &middot; 06 &middot; 2026</p>
+
+        <div class="divider"></div>
+
+        <p class="lead">Vytiskněte si fotku<br>na památku</p>
+
+        <ol class="steps">
+            <li>
+                <div>
+                    <span class="s-title">Nahrajte fotku</span>
+                    <span class="s-desc">Naskenujte <strong>QR kód</strong> na stole svým telefonem a nahrajte fotku z dnešního dne.</span>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <span class="s-title">Najděte ji tady</span>
+                    <span class="s-desc">Na <strong>telefonu u tiskárny</strong> se vaše fotka za chvilku objeví — nejnovější jsou nahoře.</span>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <span class="s-title">Pošlete do tiskárny</span>
+                    <span class="s-desc">Ťukněte na <strong>Sdílet → Instax</strong>, pak v aplikaci na <strong>Tisk</strong>.</span>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <span class="s-title">Do alba, nebo domů</span>
+                    <span class="s-desc">Za chvíli fotka vyjede. Vytáhněte ji, nechte zaschnout — a <strong>nalepte do alba</strong>, nebo si ji <strong>vezměte domů</strong>.</span>
+                </div>
+            </li>
+        </ol>
+
+        <p class="note">Tiskne se po jedné a chvilku to trvá — buďte prosím trpěliví a ohleduplní, ať si vytiskne každý. 🤍</p>
+
+        <p class="footer-note">Děkujeme, že jste s námi</p>
+    </div>
+
+</body>
+</html>
