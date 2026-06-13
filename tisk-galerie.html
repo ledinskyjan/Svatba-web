@@ -53,6 +53,14 @@
             flex-wrap: wrap;
         }
         .meta strong { color: var(--text); font-weight: 700; }
+        .hint {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.4;
+            max-width: 640px;
+        }
+        .hint strong { color: var(--accent-dark); font-weight: 600; }
         .filter-bar {
             padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--line);
@@ -233,6 +241,7 @@
                     <span><strong id="count-pending">0</strong> k tisku</span>
                     <span><strong id="count-printed">0</strong> vytisknuto</span>
                 </div>
+                <div class="hint">Klepni na <strong>Sdílet → Instax</strong> → v panelu dej „Uložit obrázek" a fotku vytiskni v appce instax Link Wide (nebo rovnou „instax", pokud se nabídne).</div>
             </div>
         </header>
 
@@ -379,7 +388,7 @@
                     <div class="card-time">${date} · ${time}</div>
                     <div class="card-actions">
                         ${isPrinted
-                            ? `<button class="btn btn-secondary" onclick="reprint('${p.public_id}','${fullUrl}','${p.format}')">Tisk znovu</button>`
+                            ? `<button class="btn btn-secondary" onclick="reprint('${p.public_id}','${fullUrl}','${p.format}')">Sdílet znovu</button>`
                             : `<button class="btn btn-print" onclick="printPhoto('${p.public_id}','${fullUrl}','${p.format}')">Sdílet → Instax</button>`
                         }
                         <a class="btn btn-secondary" href="${fullUrl}" download="${p.public_id}.jpg" target="_blank">⤓</a>
@@ -389,79 +398,50 @@
         }).join('');
     }
 
+    // iPhone workflow: fotku stáhneme v plné kvalitě a předáme do systémového
+    // panelu sdílení (Web Share API). Obsluha pak v panelu dá "Uložit obrázek"
+    // (a v appce instax Link Wide vybere z Fotek), nebo rovnou "instax", pokud
+    // se appka v panelu nabídne. a_exif = Cloudinary otočí fotku podle EXIF,
+    // takže do appky jde už správně orientovaná.
     async function printPhoto(id, url, format) {
+        const shareUrl = url.replace('/upload/', '/upload/a_exif/');
+        const fileName = 'svatba-' + String(id).replace(/[^a-z0-9]+/gi, '-') + '.jpg';
         try {
-            // a_exif: Cloudinary fyzicky otočí fotku podle EXIF před stažením
-            // Tím naturalWidth/Height odpovídají skutečné orientaci — žádné záhady s EXIF
-            const printUrl = url.replace('/upload/', '/upload/a_exif/');
-
-            const res = await fetch(printUrl);
+            const res = await fetch(shareUrl);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
             const blob = await res.blob();
+            const file = new File([blob], fileName, { type: 'image/jpeg' });
+
+            // Pokud zařízení umí sdílet soubory (iPhone Safari) → systémový panel
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file] });
+                    markPrinted(id);
+                    toast('Sdíleno — v appce instax vytiskni fotku.');
+                    render();
+                } catch (err) {
+                    // Uživatel panel sdílení zavřel — nic neoznačujeme
+                    if (err && err.name === 'AbortError') return;
+                    throw err;
+                }
+                return;
+            }
+
+            // Fallback (počítač / starší prohlížeč): otevři fotku v nové záložce,
+            // odkud se dá dlouhým podržením uložit do Fotek.
             const objectUrl = URL.createObjectURL(blob);
-
-            const win = window.open('', '_blank', 'width=900,height=700');
-            win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>​</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-@page { margin:0; }
-html,body { width:100%; height:100%; overflow:hidden; background:#000; }
-canvas { position:fixed; top:0; left:0; width:100%; height:100%; }
-</style>
-</head>
-<body>
-<canvas id="c"></canvas>
-<script>
-(function(){
-  var img = new Image();
-  img.onload = function(){
-    var cw = window.innerWidth  || 900;
-    var ch = window.innerHeight || 700;
-    var c  = document.getElementById('c');
-    c.width  = cw;
-    c.height = ch;
-    var ctx = c.getContext('2d');
-    var W = img.naturalWidth, H = img.naturalHeight;
-    // Po a_exif transformaci: portrait = H > W, landscape = W >= H
-    // Vždy Math.min = contain: celá fotka vidět, černé pruhy kde zbyde místo
-    if (H > W) {
-      // Portrétní fotka — otočíme o 90° do landscape, pak contain
-      var sc = Math.min(cw/H, ch/W);
-      ctx.translate(cw/2, ch/2);
-      ctx.rotate(Math.PI/2);
-      ctx.drawImage(img, -W*sc/2, -H*sc/2, W*sc, H*sc);
-    } else {
-      // Krajinná fotka — contain v landscape canvas
-      var sc = Math.min(cw/W, ch/H);
-      ctx.drawImage(img, (cw-W*sc)/2, (ch-H*sc)/2, W*sc, H*sc);
-    }
-    URL.revokeObjectURL('${objectUrl}');
-    setTimeout(function(){
-      window.print();
-      window.onafterprint = function(){ window.close(); };
-    }, 400);
-  };
-  img.src = '${objectUrl}';
-})();
-<\/script>
-</body>
-</html>`);
-            win.document.close();
-
+            window.open(objectUrl, '_blank');
             markPrinted(id);
-            toast('Otevřen tiskový dialog — vyber INSTAX tiskárnu.');
+            toast('Sdílení není podporováno — fotku ulož dlouhým podržením a vytiskni v instax appce.');
             render();
         } catch (err) {
             console.error(err);
-            toast('Chyba při přípravě tisku: ' + err.message);
+            toast('Chyba při přípravě fotky: ' + err.message);
         }
     }
 
     function reprint(id, url, format) {
-        if (confirm('Opravdu znovu vytisknout?')) {
+        if (confirm('Opravdu znovu sdílet k tisku?')) {
             unmarkPrinted(id);
             printPhoto(id, url, format);
         }

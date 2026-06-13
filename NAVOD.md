@@ -14,6 +14,7 @@ Ve složce `Webové stránky` jsou tyto soubory:
 - **`styles.css`** — vzhled webu (minimalistický, sage zelený akcent).
 - **`script.js`** — JavaScript (navigace, animace, Cloudinary upload widget). **Tady budeš dosazovat svoje Cloudinary údaje.**
 - **`tisk-qr.html`** — samostatná A5 stránka s QR kódem pro hosty. Otevřeš v prohlížeči a vytiskneš.
+- **`tisk-galerie.html`** — tisková galerie pro obsluhu. Otevřeš na **iPhonu**, vidíš nahrané fotky a tlačítkem **Sdílet → Instax** je pošleš do appky instax Link Wide.
 - **`NAVOD.md`** — tento návod.
 
 ---
@@ -163,17 +164,28 @@ Teď web nasměrujeme na tvou doménu.
 
 ## Krok 8 — Jak to celé funguje na svatbě
 
-1. **Host** naskenuje QR kód u stolu.
-2. Otevře se mu `ledinskych.cz/#fotky` na telefonu.
-3. Klikne na **Nahrát fotku**, vybere foto ze své galerie, počká pár vteřin.
-4. Fotka se uloží do tvého Cloudinary účtu, do složky `svatba-martina-honza`.
-5. **Ty (nebo někdo pověřený obsluhou tiskárny)** máš v Cloudinary otevřenou složku v prohlížeči nebo v mobilu — nové fotky se objevují průběžně. Vybereš tu hezkou, stáhneš na telefon (palec → stáhnout).
-6. Z mobilní galerie pošleš do **Fujifilm Instax app** (Sdílet → Instax) a vytiskneš.
+**Tisk řešíme z iPhonu (model Link Wide), ne z počítače.** Instax Link Wide se k počítači jako tiskárna nepřipojuje — tiskne přes Bluetooth a vlastní appku „instax Link Wide". Proto obsluha pracuje na telefonu se stránkou `tisk-galerie.html`.
+
+### Příprava obsluhy (jednou, před svatbou)
+
+1. Na iPhone nainstaluj appku **instax Link Wide** z App Store a spároj ji s tiskárnou přes Bluetooth (zapni tiskárnu → v appce klepni na ikonu připojení).
+2. V Safari otevři tiskovou galerii: `https://ledinskych.cz/tisk-galerie.html` (nebo `…pages.dev/tisk-galerie.html`).
+3. Zadej heslo obsluhy (`martina2026`, dá se změnit v `tisk-galerie.html`, proměnná `PASSWORD`).
+4. Tip: přidej si stránku na plochu (Sdílet → Přidat na plochu), ať ji máš jako appku.
+
+### Na svatbě
+
+1. **Host** naskenuje QR kód u stolu → otevře se `ledinskych.cz/#fotky` → klepne **Nahrát fotku** → vybere foto → za pár vteřin se nahraje do Cloudinary (složka `svatba-martina-honza`).
+2. **Obsluha** má na iPhonu otevřenou **tiskovou galerii** — nové fotky se objevují samy (obnova každých 10 s), nejnovější nahoře.
+3. U vybrané fotky klepni na **Sdílet → Instax**. Otevře se systémový panel sdílení iPhonu.
+4. V panelu buď klepni rovnou na **instax Link Wide** (pokud se nabídne), nebo dej **„Uložit obrázek"** → fotka se uloží do Fotek.
+5. Pokud jsi ukládal do Fotek: přepni do appky **instax Link Wide** → vyber fotku z knihovny → uprav (rámeček/filtr) → **Tisk**.
+6. Fotka se v galerii sama označí jako „vytisknuto", takže máš přehled. Filtr **K tisku** ukazuje jen ještě nevytištěné.
 
 > **Praktické tipy:**
-> - Mít u tiskárny 1 člověka stačí. Ideálně někdo, kdo si v klidu sedne a má v mobilu otevřený Cloudinary + Instax app.
-> - Tiskárny Instax tisknou poměrně pomalu (1 fotka ~15 s) a baterie i kazety dojdou — počítej s rezervou.
-> - Filtrace v Cloudinary: v Media Library můžeš řadit podle data nahrání (nejnovější nahoře), takže obsluha hned vidí čerstvé fotky.
+> - Stačí 1 člověk u tiskárny — ideálně někdo, kdo si sedne a má iPhone s otevřenou galerií + spárovanou instax appkou.
+> - Instax tiskne pomalu (~15 s/fotka) a baterie i kazety (film **WIDE**) dojdou — měj rezervu a USB‑C nabíječku.
+> - Sdílení do appky vyžaduje iOS 16+ (appka instax Link Wide ho stejně vyžaduje).
 
 ---
 
@@ -198,6 +210,8 @@ Pokud chceš místo GitHub web editoru používat něco komfortnějšího, můž
 - [ ] Otestováno odeslání RSVP formuláře (přišlo na e-mail)
 - [ ] `https://ledinskych.cz` funguje a má HTTPS visačku zámku
 - [ ] Vytištěné A5 QR kódy do stolů
+- [ ] iPhone: appka instax Link Wide spárovaná s tiskárnou (zkušební výtisk)
+- [ ] iPhone: otevřená `tisk-galerie.html`, otestováno **Sdílet → Instax** na zkušební fotce
 
 ---
 
