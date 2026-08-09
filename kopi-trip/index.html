@@ -47,15 +47,15 @@
   .bar{position:sticky;top:0;z-index:20;background:rgba(11,21,36,.93);
     backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px 0 8px;margin-top:16px}
   #barTop{height:1px}
-  /* compact brand + counter, appears once the header has scrolled away */
-  .barbrand{display:none;align-items:center;justify-content:space-between;gap:12px;padding-bottom:9px}
-  .bar.stuck .barbrand{display:flex}
-  .bar.stuck .search{padding:8px 12px;font-size:15px}
-  .barbrand b{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:14px;letter-spacing:.02em}
-  .barbrand b span{color:var(--kunyit)}
-  .barbrand i{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:10.5px;
-    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-  .barbrand i em{font-style:normal;color:var(--kunyit);font-size:13px;font-weight:600}
+  /* scrolled state must cost less height, not more: counter joins the search row */
+  .searchrow{display:flex;align-items:center;gap:11px}
+  .searchrow .search{flex:1;min-width:0}
+  .barpas{display:none;flex:0 0 auto;font-family:"JetBrains Mono",monospace;font-style:normal;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .barpas em{font-style:normal;color:var(--kunyit);font-weight:600;font-size:14px}
+  .bar.stuck .barpas{display:block}
+  .bar.stuck .search{padding:7px 12px;font-size:15px}
+  .bar.stuck .chips{padding-top:7px}
   .search{width:100%;background:var(--ink2);border:1px solid var(--line);color:var(--rice);
     border-radius:10px;padding:11px 13px;font-family:"Newsreader",serif;font-size:16px}
   .search::placeholder{color:#6E82A4}
@@ -218,11 +218,10 @@
   <div id="barTop" aria-hidden="true"></div>
   <div class="bar">
     <div class="wrap">
-      <div class="barbrand" aria-hidden="true">
-        <b>KOPI&nbsp;<span>TRIP</span></b>
-        <i><em id="barCount">0</em> / <span id="barTotal">0</span> stamped</i>
+      <div class="searchrow">
+        <input class="search" id="q" type="search" placeholder="Search a place, area or bean…" aria-label="Search">
+        <i class="barpas" aria-hidden="true"><em id="barCount">0</em> / <span id="barTotal">0</span></i>
       </div>
-      <input class="search" id="q" type="search" placeholder="Search a place, area or bean…" aria-label="Search">
       <div class="chips" id="regionChips" role="group" aria-label="Region"></div>
       <div class="chips" id="tagChips" role="group" aria-label="Filter"></div>
     </div>
