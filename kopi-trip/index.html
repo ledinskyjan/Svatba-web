@@ -188,10 +188,13 @@
   }
   /* desktop: stop stretching a phone layout across 1400px of nothing */
   @media (min-width:1000px){
-    #p-places .wrap, #p-map .wrap{max-width:1120px}
+    .wrap{max-width:1120px}          /* one left edge for brand, filters, cards, footer */
     .cards{grid-template-columns:repeat(2,1fr)}
     #map{height:min(72vh,620px)}
     .areahead{margin-top:34px}
+    /* prose stays a reading column inside the wider page */
+    #p-origin .wrap > *, #p-info .wrap > *{max-width:780px}
+    footer{text-align:left}
   }
 </style>
 </head>
