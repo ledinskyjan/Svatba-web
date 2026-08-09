@@ -46,6 +46,16 @@
 
   .bar{position:sticky;top:0;z-index:20;background:rgba(11,21,36,.93);
     backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px 0 8px;margin-top:16px}
+  #barTop{height:1px}
+  /* compact brand + counter, appears once the header has scrolled away */
+  .barbrand{display:none;align-items:center;justify-content:space-between;gap:12px;padding-bottom:9px}
+  .bar.stuck .barbrand{display:flex}
+  .bar.stuck .search{padding:8px 12px;font-size:15px}
+  .barbrand b{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:14px;letter-spacing:.02em}
+  .barbrand b span{color:var(--kunyit)}
+  .barbrand i{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:10.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .barbrand i em{font-style:normal;color:var(--kunyit);font-size:13px;font-weight:600}
   .search{width:100%;background:var(--ink2);border:1px solid var(--line);color:var(--rice);
     border-radius:10px;padding:11px 13px;font-family:"Newsreader",serif;font-size:16px}
   .search::placeholder{color:#6E82A4}
@@ -54,7 +64,8 @@
   .chips::-webkit-scrollbar{display:none}
   .chip{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--muted);
     border-radius:999px;padding:6px 13px;font-family:"JetBrains Mono",monospace;font-size:11px;
-    letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+    letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+    min-height:36px;display:inline-flex;align-items:center}
   .chip[aria-pressed="true"]{background:var(--kunyit);border-color:var(--kunyit);color:#10192B;font-weight:600}
   .chip:focus-visible{outline:2px solid var(--rice);outline-offset:2px}
 
@@ -64,11 +75,18 @@
   .areahead hr{flex:1;border:0;border-top:1px solid var(--line);margin:0}
   .areahead em{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:10.5px;color:var(--muted)}
 
+  .cards{display:grid;gap:11px}
   .card{position:relative;background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);
-    padding:15px 16px 13px;margin-bottom:11px;overflow:hidden}
+    padding:15px 16px 13px;overflow:hidden;border-left-width:3px;border-left-color:transparent}
   .card.done{border-color:rgba(226,86,74,.55)}
+  /* rating drives weight: five stars are the ones you plan a day around */
+  .card.s5{border-left-color:var(--kunyit)}
+  .card.s4{border-left-color:rgba(240,180,41,.38)}
   .card h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:19px;
     letter-spacing:-.01em;margin:0 62px 2px 0;line-height:1.15}
+  .card.s5 h3{font-size:22px}
+  .card.s3 h3{font-size:17.5px}
+  .card.s3 .why{font-size:15.5px}
   .stars{font-size:12px;letter-spacing:.12em;color:var(--kunyit);margin:0 0 6px}
   .stars span{color:#3A4C6E}
   .hrs{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:10px;letter-spacing:.06em;
@@ -88,11 +106,16 @@
     border:1px solid var(--line);border-radius:5px;padding:2.5px 7px}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .btn{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-    border-radius:8px;padding:8px 12px;cursor:pointer;border:1px solid var(--line);
-    background:transparent;color:var(--muted);text-decoration:none;display:inline-block}
+    border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);
+    background:transparent;color:var(--muted);text-decoration:none;
+    min-height:42px;display:inline-flex;align-items:center}
   .btn:hover{border-color:var(--kunyit);color:var(--kunyit)}
   .btn:focus-visible{outline:2px solid var(--kunyit);outline-offset:2px}
-  .btn.mark[aria-pressed="true"]{border-color:var(--stamp);color:var(--stamp)}
+  /* stamping is the point of the page — it should not look like the Maps link */
+  .btn.mark{border-color:var(--kunyit);color:var(--kunyit);font-weight:600}
+  .btn.mark:hover{background:var(--kunyit);color:#10192B}
+  .btn.mark[aria-pressed="true"]{border-color:var(--stamp);color:var(--stamp);background:transparent;font-weight:400}
+  .btn.mark[aria-pressed="true"]:hover{background:transparent;color:var(--stamp)}
 
   .stampmark{position:absolute;top:12px;right:10px;width:74px;height:74px;border-radius:50%;
     border:2px solid var(--stamp);color:var(--stamp);display:grid;place-content:center;text-align:center;
@@ -134,6 +157,11 @@
   .price{width:100%;border-collapse:collapse;margin-top:6px}
   .price td{border-bottom:1px solid var(--line);padding:9px 0;font-size:15.5px;color:#D6CEC1}
   .price td:last-child{text-align:right;font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--rice);white-space:nowrap}
+  /* vocabulary is prose, not a figure column — only the Indonesian words stay mono */
+  .price.vocab td, .price.vocab td:last-child{text-align:left;white-space:normal;
+    font-family:"Newsreader",Georgia,serif;font-size:16px;color:#D6CEC1;padding:11px 0}
+  .price.vocab b{font-family:"JetBrains Mono",monospace;font-size:12.5px;letter-spacing:.02em;
+    color:var(--rice);font-weight:600}
   .sectitle{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:26px;
     letter-spacing:-.02em;margin:22px 0 4px}
   .subhead{font-family:"Bricolage Grotesque",sans-serif;font-size:16px;letter-spacing:.02em;
@@ -148,9 +176,23 @@
     border-radius:10px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
   .tab[aria-selected="true"]{background:var(--ink3);color:var(--kunyit)}
   .tab:focus-visible{outline:2px solid var(--kunyit);outline-offset:-2px}
-  footer{color:#63769A;font-size:12.5px;text-align:center;padding:26px 0 10px;
+  footer{color:#7E90B2;font-size:12.5px;text-align:center;padding:26px 0 10px;
     font-family:"JetBrains Mono",monospace;letter-spacing:.04em;line-height:1.7}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+  /* phone first: the header must not eat the fold on every tab */
+  @media (max-width:520px){
+    header{padding:18px 0 10px}
+    .lede{margin-top:10px;font-size:15px}
+    .card{padding:14px 14px 12px}
+  }
+  /* desktop: stop stretching a phone layout across 1400px of nothing */
+  @media (min-width:1000px){
+    #p-places .wrap, #p-map .wrap{max-width:1120px}
+    .cards{grid-template-columns:repeat(2,1fr)}
+    #map{height:min(72vh,620px)}
+    .areahead{margin-top:34px}
+  }
 </style>
 </head>
 <body>
@@ -170,8 +212,13 @@
 </div>
 
 <section class="panel on" id="p-places">
+  <div id="barTop" aria-hidden="true"></div>
   <div class="bar">
     <div class="wrap">
+      <div class="barbrand" aria-hidden="true">
+        <b>KOPI&nbsp;<span>TRIP</span></b>
+        <i><em id="barCount">0</em> / <span id="barTotal">0</span> stamped</i>
+      </div>
       <input class="search" id="q" type="search" placeholder="Search a place, area or bean…" aria-label="Search">
       <div class="chips" id="regionChips" role="group" aria-label="Region"></div>
       <div class="chips" id="tagChips" role="group" aria-label="Filter"></div>
@@ -222,7 +269,7 @@
     </table>
 
     <h3 class="subhead">Vocabulary</h3>
-    <table class="price">
+    <table class="price vocab">
       <tr><td><b>kopi</b> — coffee. <b>biji kopi</b> — coffee beans, the words on the bag you want</td></tr>
       <tr><td><b>kopi hitam</b> — black coffee. <b>tanpa gula</b> — without sugar, say it when you order</td></tr>
       <tr><td><b>kopi tubruk</b> — grounds brewed straight in the cup, silt left at the bottom</td></tr>
@@ -611,9 +658,9 @@ function renderList(){
   items.forEach(p=>{ (byArea[p.a] = byArea[p.a] || []).push(p); });
   list.innerHTML = Object.entries(byArea).map(([area,ps])=>`
     <div class="areahead"><h2>${esc(area)}</h2><hr><em>${ps.length}</em></div>
-    ${ps.map(p=>{
+    <div class="cards">${ps.map(p=>{
       const done = state.done.has(p.n);
-      return `<article class="card${done?" done":""}${p.x?" paused":""}">
+      return `<article class="card s${p.s}${done?" done":""}${p.x?" paused":""}">
         <div class="stampmark" aria-hidden="true"><b>TASTED</b>KOPI TRIP</div>
         <h3>${esc(p.n)}</h3>
         <p class="stars" aria-label="${p.s} out of 5">${stars(p.s)}${hoursLine(p)}</p>
@@ -625,12 +672,14 @@ function renderList(){
           <a class="btn" href="${mapsUrl(p)}" target="_blank" rel="noopener">Map</a>
         </div>
       </article>`;
-    }).join("")}`).join("");
+    }).join("")}</div>`).join("");
 }
 
 function renderPas(){
   document.getElementById("pasCount").textContent = state.done.size;
   document.getElementById("pasTotal").textContent = PLACES.length;
+  document.getElementById("barCount").textContent = state.done.size;
+  document.getElementById("barTotal").textContent = PLACES.length;
   document.getElementById("pasDots").innerHTML =
     PLACES.map(p=>`<i class="${state.done.has(p.n)?"on":""}"></i>`).join("");
 }
@@ -688,8 +737,17 @@ document.getElementById("q").addEventListener("input", e=>{
   renderList();
 });
 
+/* once the header scrolls past, the sticky bar carries the brand and the count */
+function watchBar(){
+  const sentinel = document.getElementById("barTop"), bar = document.querySelector(".bar");
+  if(!sentinel || !bar || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(
+    ([entry]) => bar.classList.toggle("stuck", !entry.isIntersecting)
+  ).observe(sentinel);
+}
+
 (async function init(){
-  renderChips(); renderOrigins();
+  renderChips(); renderOrigins(); watchBar();
   await loadDone();
   renderList(); renderPas();
 })();
