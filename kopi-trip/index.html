@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- STAGING: po finálním nasazení odstranit tento meta tag i Disallow v /robots.txt -->
+<meta name="robots" content="noindex,nofollow">
+<title>Kopi Trip — Specialty Coffee in Indonesia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{
+    --ink:#0B1524; --ink2:#12203A; --ink3:#16294a; --line:#263C63;
+    --rice:#F1EBE0; --muted:#8FA1C0; --kunyit:#F0B429; --jade:#48B394; --stamp:#E2564A; --r:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--ink); color:var(--rice);
+    font-family:"Newsreader",Georgia,serif; font-size:17px; line-height:1.5;
+    padding-bottom:98px;
+    background-image:
+      radial-gradient(900px 500px at 88% -8%, rgba(240,180,41,.10), transparent 60%),
+      radial-gradient(700px 500px at -10% 12%, rgba(72,179,148,.09), transparent 60%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 18px}
+
+  header{padding:26px 0 14px}
+  .brand{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+  .mark{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;
+    font-size:clamp(34px,10vw,48px);line-height:.92;letter-spacing:-.03em;margin:0}
+  .mark span{color:var(--kunyit)}
+  .kicker{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .lede{color:var(--muted);font-size:15.5px;margin:12px 0 0;max-width:46ch}
+  .pas{flex:0 0 auto;text-align:right}
+  .pas b{font-family:"Bricolage Grotesque",sans-serif;font-size:26px;line-height:1;display:block;color:var(--kunyit)}
+  .pas i{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:9.5px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-end;max-width:120px;margin-top:7px}
+  .dots i{width:6px;height:6px;border-radius:50%;border:1px solid var(--line)}
+  .dots i.on{background:var(--stamp);border-color:var(--stamp)}
+
+  .bar{position:sticky;top:0;z-index:20;background:rgba(11,21,36,.93);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px 0 8px;margin-top:16px}
+  .search{width:100%;background:var(--ink2);border:1px solid var(--line);color:var(--rice);
+    border-radius:10px;padding:11px 13px;font-family:"Newsreader",serif;font-size:16px}
+  .search::placeholder{color:#6E82A4}
+  .search:focus{outline:2px solid var(--kunyit);outline-offset:1px}
+  .chips{display:flex;gap:7px;overflow-x:auto;padding:9px 0 2px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:999px;padding:6px 13px;font-family:"JetBrains Mono",monospace;font-size:11px;
+    letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--kunyit);border-color:var(--kunyit);color:#10192B;font-weight:600}
+  .chip:focus-visible{outline:2px solid var(--rice);outline-offset:2px}
+
+  .areahead{display:flex;align-items:baseline;gap:10px;margin:26px 0 10px}
+  .areahead h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:15px;
+    letter-spacing:.02em;margin:0;text-transform:uppercase}
+  .areahead hr{flex:1;border:0;border-top:1px solid var(--line);margin:0}
+  .areahead em{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:10.5px;color:var(--muted)}
+
+  .card{position:relative;background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);
+    padding:15px 16px 13px;margin-bottom:11px;overflow:hidden}
+  .card.done{border-color:rgba(226,86,74,.55)}
+  .card h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:19px;
+    letter-spacing:-.01em;margin:0 62px 2px 0;line-height:1.15}
+  .stars{font-size:12px;letter-spacing:.12em;color:var(--kunyit);margin:0 0 6px}
+  .stars span{color:#3A4C6E}
+  .hrs{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:10px;letter-spacing:.06em;
+    color:var(--muted);margin-left:8px}
+  .hrs.live{color:var(--jade)}
+  .hrs.shut{color:#7C8AA6}
+  .card.paused{opacity:.62}
+  .card.paused .why{color:#A9B6CC}
+  .hrs.paused{color:var(--stamp)}
+  .chip.open[aria-pressed="true"]{background:var(--jade);border-color:var(--jade);color:#08160F}
+  .why{margin:6px 62px 10px 0;font-size:16px;color:#DCD5C9}
+  .order{font-size:15px;margin:0 0 11px;color:var(--rice)}
+  .order b{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--jade);display:block;margin-bottom:2px;font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+  .tag{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.07em;color:var(--muted);
+    border:1px solid var(--line);border-radius:5px;padding:2.5px 7px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    border-radius:8px;padding:8px 12px;cursor:pointer;border:1px solid var(--line);
+    background:transparent;color:var(--muted);text-decoration:none;display:inline-block}
+  .btn:hover{border-color:var(--kunyit);color:var(--kunyit)}
+  .btn:focus-visible{outline:2px solid var(--kunyit);outline-offset:2px}
+  .btn.mark[aria-pressed="true"]{border-color:var(--stamp);color:var(--stamp)}
+
+  .stampmark{position:absolute;top:12px;right:10px;width:74px;height:74px;border-radius:50%;
+    border:2px solid var(--stamp);color:var(--stamp);display:grid;place-content:center;text-align:center;
+    font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.1em;line-height:1.35;
+    transform:rotate(-13deg) scale(.5);opacity:0;transition:transform .35s cubic-bezier(.2,1.4,.4,1),opacity .25s;
+    pointer-events:none;box-shadow:inset 0 0 0 1px rgba(226,86,74,.45)}
+  .card.done .stampmark{opacity:.92;transform:rotate(-13deg) scale(1)}
+  .stampmark b{display:block;font-size:10px;letter-spacing:.06em}
+
+  .panel{display:none}
+  .panel.on{display:block}
+  #map{height:min(66vh,540px);border:1px solid var(--line);border-radius:var(--r);margin-top:14px;background:var(--ink2)}
+  .leaflet-container{background:#16263F;font-family:"Newsreader",serif}
+  .leaflet-tile-pane{filter:brightness(1.5) contrast(.92) saturate(1.1)}
+  .leaflet-popup-content-wrapper{background:var(--ink2);color:var(--rice);border-radius:10px;border:1px solid var(--line)}
+  .leaflet-popup-tip{background:var(--ink2)}
+  .leaflet-popup-content{margin:11px 13px;font-size:15px}
+  .leaflet-popup-content b{font-family:"Bricolage Grotesque",sans-serif;font-size:16px}
+  .leaflet-popup-content a{color:var(--kunyit)}
+  .leaflet-popup-close-button{color:var(--muted)!important}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-family:"JetBrains Mono",monospace;
+    font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .pin{width:15px;height:15px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #0B1524}
+
+  .note{background:var(--ink2);border:1px solid var(--line);border-left:3px solid var(--kunyit);
+    border-radius:10px;padding:14px 16px;margin:0 0 11px}
+  .note h3{font-family:"Bricolage Grotesque",sans-serif;font-size:17px;margin:0 0 5px;font-weight:700}
+  .note p{margin:0;color:#D6CEC1;font-size:16px}
+  .note p+p{margin-top:8px}
+  .note.warn{border-left-color:var(--stamp)}
+  .note.calm{border-left-color:var(--jade)}
+  .origin{border-bottom:1px solid var(--line);padding:14px 0}
+  .origin:last-child{border-bottom:0}
+  .origin h3{font-family:"Bricolage Grotesque",sans-serif;font-size:18px;margin:0 0 2px;font-weight:700}
+  .origin em{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:10px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--jade)}
+  .origin p{margin:6px 0 0;color:#D6CEC1;font-size:16px}
+  .price{width:100%;border-collapse:collapse;margin-top:6px}
+  .price td{border-bottom:1px solid var(--line);padding:9px 0;font-size:15.5px;color:#D6CEC1}
+  .price td:last-child{text-align:right;font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--rice);white-space:nowrap}
+  .sectitle{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:26px;
+    letter-spacing:-.02em;margin:22px 0 4px}
+  .subhead{font-family:"Bricolage Grotesque",sans-serif;font-size:16px;letter-spacing:.02em;
+    text-transform:uppercase;margin:24px 0 2px}
+  .subtle{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:16px}
+
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:1000;background:rgba(11,21,36,.95);
+    backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+  nav.tabs .wrap{display:flex;gap:5px}
+  .tab{flex:1;background:transparent;border:0;color:var(--muted);cursor:pointer;padding:9px 2px;
+    border-radius:10px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+  .tab[aria-selected="true"]{background:var(--ink3);color:var(--kunyit)}
+  .tab:focus-visible{outline:2px solid var(--kunyit);outline-offset:-2px}
+  footer{color:#63769A;font-size:12.5px;text-align:center;padding:26px 0 10px;
+    font-family:"JetBrains Mono",monospace;letter-spacing:.04em;line-height:1.7}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1 class="mark">KOPI<br><span>TRIP</span></h1>
+      <div class="pas">
+        <b id="pasCount">0</b>
+        <i>stamped / <span id="pasTotal">0</span></i>
+        <div class="dots" id="pasDots"></div>
+      </div>
+    </div>
+    <p class="lede">Roasteries, brew bars and one properly pulled espresso at every stop. Stamp your way through Indonesia.</p>
+  </header>
+</div>
+
+<section class="panel on" id="p-places">
+  <div class="bar">
+    <div class="wrap">
+      <input class="search" id="q" type="search" placeholder="Search a place, area or bean…" aria-label="Search">
+      <div class="chips" id="regionChips" role="group" aria-label="Region"></div>
+      <div class="chips" id="tagChips" role="group" aria-label="Filter"></div>
+    </div>
+  </div>
+  <div class="wrap" id="list"></div>
+</section>
+
+<section class="panel" id="p-map">
+  <div class="wrap">
+    <h2 class="sectitle">The map</h2>
+    <p class="subtle">Every stop in the guide. Tap a pin to have a look.</p>
+    <div id="map"></div>
+    <div class="legend">
+      <span><i style="background:#F0B429"></i>Bali</span>
+      <span><i style="background:#48B394"></i>Flores</span>
+      <span><i style="background:#5B9BD5"></i>Gili</span>
+      <span><i style="background:#E4A0BE"></i>Sumbawa</span>
+      <span><i style="background:#C58BE0"></i>Lombok</span>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-origin">
+  <div class="wrap">
+    <h2 class="sectitle">Where it comes from</h2>
+    <p class="subtle">Six growing regions you can taste — and why the way coffee is processed here shapes the cup more than the region does.</p>
+    <div class="note calm">
+      <h3>Giling basah</h3>
+      <p>Indonesia's wet-hulled method: the parchment comes off while the bean still holds 30–35% moisture. You get blue-green beans, low acidity, heavy body and that unmistakable earthy, cedar, spiced cup. If someone tells you Indonesian coffee tastes flat, they drank stale robusta, not this.</p>
+    </div>
+    <div id="origins"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-info">
+  <div class="wrap">
+    <h2 class="sectitle">Practical</h2>
+    <p class="subtle">Prices, vocabulary and the things worth knowing before you go.</p>
+
+    <h3 class="subhead">Prices, 2026 (rough)</h3>
+    <table class="price">
+      <tr><td>Espresso at a specialty bar</td><td>IDR 25,000</td></tr>
+      <tr><td>Flat white / cappuccino</td><td>IDR 35–50,000</td></tr>
+      <tr><td>Es kopi susu at a warung</td><td>IDR 15–25,000</td></tr>
+      <tr><td>250 g specialty beans (Kintamani)</td><td>IDR 120–180,000</td></tr>
+      <tr><td>250 g supermarket brand</td><td>IDR 25–45,000</td></tr>
+    </table>
+
+    <h3 class="subhead">Vocabulary</h3>
+    <table class="price">
+      <tr><td><b>kopi</b> — coffee. <b>biji kopi</b> — coffee beans, the words on the bag you want</td></tr>
+      <tr><td><b>kopi hitam</b> — black coffee. <b>tanpa gula</b> — without sugar, say it when you order</td></tr>
+      <tr><td><b>kopi tubruk</b> — grounds brewed straight in the cup, silt left at the bottom</td></tr>
+      <tr><td><b>kopi susu</b> — with condensed milk. <b>es kopi susu</b> — the same over ice</td></tr>
+      <tr><td><b>gula aren</b> — palm sugar, the caramel note in half the iced drinks here</td></tr>
+      <tr><td><b>kopi saring</b> — brewed through a cloth filter, mostly upcountry</td></tr>
+    </table>
+
+    <h3 class="subhead">Field notes</h3>
+
+    <div class="note">
+      <h3>The overland route</h3>
+      <p>Most people fly Lombok to Labuan Bajo and never see the island in between. Going overland means two ferries — Kayangan to Poto Tano, then Sape to Labuan Bajo — and a full day's driving across Sumbawa. There is coffee the whole way, in Taliwang, Maluk, Sumbawa Besar, Dompu and Bima, and almost none of it appears in any guide.</p>
+      <p>Time it around the ferries rather than the cafés. The Flores crossing leaves Sape in the morning, so plan to sleep there.</p>
+    </div>
+
+    <div class="note">
+      <h3>Coffee on the Komodo boat</h3>
+      <p>A liveaboard gives you a 3-in-1 sachet and nothing else. Hot water, however, is never a problem. Bring 250 g ground in Labuan Bajo and a dripper or an AeroPress and you'll have the best cup within fifty nautical miles.</p>
+    </div>
+
+    <div class="note">
+      <h3>Kampung Komodo and Rinca</h3>
+      <p>Don't go looking for specialty here. What a warung will give you is kopi hitam the local way: coarse grounds, hot water poured straight in, silt on the bottom. Let it settle a minute and stop before the last mouthful. Say "tanpa gula" up front if you don't want it sweet.</p>
+    </div>
+
+    <div class="note">
+      <h3>The Kintamani ridge</h3>
+      <p>A string of cafés along the crater rim with Batur in front of you. The coffee is uneven and the view isn't — and the beans grow directly below. Worth the drive for the beans and the landscape rather than the brewing.</p>
+    </div>
+
+    <h3 class="subhead">Before you go</h3>
+
+    <div class="note warn">
+      <h3>Skip kopi luwak</h3>
+      <p>The tourist luwak farms on Bali keep civets caged and force-feed them. What lands on the tasting tray after the plantation tour tends to be roasted dark enough to hide an unremarkable bean anyway. The same money buys you three excellent single-origin filters.</p>
+    </div>
+
+    <div class="note">
+      <h3>Buying beans with carry-on only</h3>
+      <p>Beans are heavier than they look — count on the extra weight before you commit to a third bag, especially with cabin baggage only. Make the ones you do take things you can't get elsewhere: Flores Juria, Manggarai Colol, Kintamani.</p>
+      <p>Look for a roast date, not an expiry date. Humidity kills coffee fast here — take a bag from the back of the shelf and decant it into something airtight when you get home.</p>
+    </div>
+
+    <div class="note">
+      <h3>Cash on the Gilis, and hours everywhere</h3>
+      <p>Smaller places on all three Gilis are cash only and the ATMs on Trawangan are regularly empty. Draw enough on Lombok before you board.</p>
+      <p>Check opening hours before you set out — they shift with the season and plenty of places shut around 5 pm. The Map button on each card opens Google Maps.</p>
+    </div>
+  </div>
+</section>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <div class="wrap">
+    <button class="tab" role="tab" aria-selected="true" data-panel="p-places">Places</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="p-map">Map</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="p-origin">Origins</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="p-info">Practical</button>
+  </div>
+</nav>
+
+<div class="wrap"><footer>
+  Every stop is visited, read up on and checked before it goes in — and checked again after,<br>
+  because places here move, close and change hands<br><br>
+  ★★★★★ essential · ★★★★ worth a small detour · ★★★ when you're passing by<br>
+  Hours are Bali/Lombok time and do go out of date — worth a look before a long ride
+</footer></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const PLACES = [
+  // BALI
+  {n:"Seniman Coffee", a:"Ubud", r:"bali", s:5, lat:-8.5067234, lng:115.2651548,
+   w:"The most important address in Ubud: their own roastery, cupping sessions and people who helped build Indonesia's specialty scene. Now shares a courtyard with a bakery and a record store.",
+   o:"Cold brew tasting flight", t:["beans","filter"]},
+  {n:"Expat. Roasters Petitenget", a:"Seminyak & Kerobokan", r:"bali", s:5, lat:-8.6720975, lng:115.1606826,
+   w:"The roastery that supplies half the island, Lombok included. Ask for the beans card — they'll match a bag to the flavours you describe.",
+   o:"Kintamani single origin, 250 g", t:["beans","filter"]},
+  {n:"Revolver Seminyak", a:"Seminyak & Kerobokan", r:"bali", s:5, lat:-8.6843706, lng:115.1579758,
+   w:"Down a narrow laneway with a doorman, packed from seven in the morning. Darker, heavier profile — the old school of Bali espresso, and open past 2 pm.",
+   o:"Long black", t:["breakfast"]},
+  {n:"Hungry Bird Coffee Roaster", a:"Canggu", r:"bali", s:5, lat:-8.6559996, lng:115.1410649,
+   w:"Built around the bean rather than the interior. Upstairs is quiet enough to read in; the baristas will happily send you to their own favourite bar down the road.",
+   o:"Whatever the barista is pouring on V60", t:["beans","filter","work"]},
+  {n:"Blacklist Coffee Roasters", a:"Canggu", r:"bali", s:5, lat:-8.6501819, lng:115.1297886,
+   w:"Roastery and concept store with local beans alongside Australian imports. They run a tasting session that's worth booking even if you already work in coffee.",
+   o:"Japanese pour-over, black honey", t:["beans","filter","breakfast"]},
+  {n:"Anomali Coffee Ubud", a:"Ubud", r:"bali", s:4, lat:-8.5082408, lng:115.2651906,
+   w:"The Indonesian chain that pushed domestic origins before anyone else. The most efficient way to taste Gayo, Toraja, Bali and Flores side by side in one sitting.",
+   o:"Flight of Indonesian origins", t:["beans","filter","work"]},
+
+  // FLORES
+  {n:"Elevate Espresso Cafe & Roastery", a:"Labuan Bajo", r:"flores", s:5, lat:-8.48967, lng:119.876534,
+   w:"Beans sourced from villages across Flores and roasted on site by an owner who will talk you through every one. Two cats, a park setting, and the best cup in town.",
+   o:"Ristretto, then a bag to take away", t:["beans"]},
+  {n:"kaffeekostbar (Labuan Bajo Coffee Roaster)", a:"Labuan Bajo", r:"flores", s:5, lat:-8.4962178, lng:119.8811398,
+   w:"Coffee only, no food — and the menu prints what they pay the farmers in East Manggarai. Arabica and robusta, natural and full-wash, roasted in house.",
+   o:"Cold brew + 250 g organic medium", t:["beans","filter"]},
+  {n:"Carpenter Cafe and Roastery", a:"Labuan Bajo", r:"flores", s:5, lat:-8.4931079, lng:119.8778523,
+   w:"On the main road but calm inside, with an outdoor section and a chair you can work from. Beans from Bajawa and Manggarai, brewed properly.",
+   o:"V60 with Flores arabica", t:["beans","filter","work"]},
+  {n:"KOMODOUGH Artisan Bakery & Coffee", a:"Labuan Bajo", r:"flores", s:5, lat:-8.4955958, lng:119.8788961,
+   w:"Laminated pastry you wouldn't expect this far east — the pandan kaya croissant in particular — with coffee that holds up next to it. Cash, card and QR.",
+   o:"Pain au chocolat + flat white", t:["breakfast"]},
+
+  {n:"DRUV Coffee & Eatery", a:"Komodo Airport", r:"flores", s:4, lat:-8.4940892, lng:119.8886717,
+   w:"Concrete, hard edges and working aircon on the airport road, open from six in the morning until eleven at night. The cheapest decent cappuccino in the area and a nasi goreng worth ordering — the obvious last stop before a flight.",
+   o:"Brown sugar coffee + nasi goreng", t:["breakfast","work"]},
+  {n:"Ploni Cafe", a:"Labuan Bajo", r:"flores", s:4, lat:-8.4904919, lng:119.8865933,
+   w:"Newer, on the road up towards the airport, with easy parking, soft pastries and staff who notice you. Indoor and outdoor seating, and comfortable enough to sit and work for a couple of hours.",
+   o:"Coffee + whatever came out of the oven", t:["breakfast","work"]},
+  {n:"LaBajo Flores Coffee, Komodo Airport", a:"Komodo Airport", r:"flores", s:5, lat:-8.4886631, lng:119.8870781,
+   w:"Second floor of the terminal, open around the clock. Walk past the first cafés you see. Last chance for Flores beans if you didn't get them in town.",
+   o:"250 g Manggarai to take home", t:["beans"]},
+
+  // GILI
+  {n:"Gili Coffee Roasters", a:"Gili Air", r:"gili", s:5, lat:-8.3576566, lng:116.0815538,
+   w:"Tucked into the middle of the island, roasting on site — beans off the Rinjani slopes and from Aceh. It feels like sitting in a garden, and the roti jala is worth staying for.",
+   o:"Rinjani Gold espresso", t:["beans","filter"]},
+  {n:"Jelajah Coffee Gili Trawangan", a:"Gili Trawangan", r:"gili", s:5, x:"Temporarily closed — renovation", lat:-8.3563384, lng:116.0420098,
+   w:"Small place by the harbour with a beach view, espresso and manual brew. Close enough to the jetty to be the last stop before the boat.",
+   o:"Flat white, in or takeaway", t:["filter"]},
+  {n:"Barefoot Blondie", a:"Gili Air", r:"gili", s:5, lat:-8.3630774, lng:116.0832677,
+   w:"Shoes off, up to the loft, watch the horse carts go past. The cleanest black coffee on the island and it arrives with an oat cookie. Plugs available.",
+   o:"Black filter + cinnamon roll to share", t:["breakfast","work"]},
+  {n:"Pachamama Organic Cafe", a:"Gili Air", r:"gili", s:5, lat:-8.3532133, lng:116.0852127,
+   w:"One street back from the busy side, organic kitchen, a spa downstairs. Slow, quiet, and good if you want a long breakfast rather than a quick shot.",
+   o:"Breakfast and a long coffee", t:["breakfast","work"]},
+  {n:"MAHAMAYA Gili Meno", a:"Gili Meno", r:"gili", s:5, lat:-8.3456655, lng:116.0517078,
+   w:"Wooden tables in the sand on the north-east of Meno with nothing between you and the water. Indonesian coffee and the quiet that Trawangan ran out of.",
+   o:"Breakfast on the beach", t:["breakfast"]},
+  {n:"The Banyan Tree", a:"Gili Trawangan", r:"gili", s:4, lat:-8.3521278, lng:116.0439159,
+   w:"Beachfront by the jetty, plant-based kitchen, air-conditioned room upstairs. Priced for the location, but an easy early breakfast before the crossing.",
+   o:"Early breakfast facing the water", t:["breakfast","work"]},
+
+  // LOMBOK
+  {n:"Jelajah Coffee Kuta", a:"Kuta Lombok", r:"lombok", s:5, lat:-8.8903311, lng:116.2766382,
+   w:"Small, bougainvillea out front, deck seats to watch the town wake up. They have V60 and they know your order by the second visit.",
+   o:"V60, or the ginger latte", t:["filter","breakfast"]},
+  {n:"MILK", a:"Kuta Lombok", r:"lombok", s:5, lat:-8.8920174, lng:116.2772457,
+   w:"Australian-leaning, on Expat Roasters beans, and somehow always has a seat. Turkish eggs, fast service, a small homewares corner.",
+   o:"Flat white + Turkish eggs", t:["breakfast"]},
+  {n:"Bush Radio", a:"Kuta Lombok", r:"lombok", s:5, lat:-8.8911584, lng:116.2771161,
+   w:"Two floors, industrial downstairs and a terrace above. Cashless, non-smoking, good wifi — the default place to sit for two hours in Kuta.",
+   o:"Coffee and the salted caramel cookie", t:["breakfast","work"]},
+  {n:"Kenza Cafe", a:"Kuta Lombok", r:"lombok", s:5, lat:-8.8912168, lng:116.2768818,
+   w:"Runs from breakfast through to dinner on the main road. Not a specialty bar in the strict sense, but the oat latte is reliable and it's open when nothing else is.",
+   o:"Latte with oat, early", t:["breakfast","work"]},
+  {n:"Satusatu Coffee Roaster", a:"Mataram", r:"lombok", s:5, lat:-8.5749235, lng:116.1030489,
+   w:"A slow bar run by an owner who roasts and wants to talk about it. Split shots, beans from Ijen and Melati. The best cup in Mataram, and near the immigration office if you're doing visa runs.",
+   o:"Split shot, single origin", t:["beans","filter"]},
+  {n:"Kupi Beans & Roastery", a:"Mataram", r:"lombok", s:5, lat:-8.5764307, lng:116.128546,
+   w:"A back-lane roastery with beans from Sumatra, Java, Sumbawa, Bali, Lombok and Flores, and an owner who has visited most of those farms. Cake made by his wife. Locals smoke indoors — that's the room you're in.",
+   o:"Manual brew, Lombok-grown", t:["beans","filter"]},
+  {n:"Salam Rinjani Coffee", a:"Senaru", r:"lombok", s:5, lat:-8.2912047, lng:116.4112884,
+   w:"On the trekking road below Rinjani, in a garden, with scales, a hand grinder and a temperature-controlled kettle. Roasting happens in front of you. Unreasonably good for where it is.",
+   o:"V60 or Vietnamese drip", t:["beans","filter"]},
+  {n:"Goeie Coffee and Eatery", a:"Senggigi", r:"lombok", s:5, lat:-8.4907065, lng:116.041064,
+   w:"Small and newer, on the main Senggigi road. Croissants, cheesecake and a staff that remembers you after one visit.",
+   o:"Coffee + croissant", t:["breakfast"]},
+
+  // BREAKFAST
+  {n:"Sisterfields", a:"Seminyak & Kerobokan", r:"bali", s:4, lat:-8.6830307, lng:115.1575518,
+   w:"The Seminyak brunch institution, and busy enough to prove it. Smoked salmon on rye, a full brekkie that arrives properly cooked, and a kitchen that will accommodate what you ask for.",
+   o:"Smoked salmon on rye + Mont Blanc", t:["breakfast"]},
+  {n:"SUKA Uluwatu", a:"Uluwatu", r:"bali", s:4, lat:-8.81635, lng:115.0960262,
+   w:"The standard stop after morning surf on the south coast — huge, always packed, live music at night. Coffee is good rather than the point.",
+   o:"Big breakfast, early", t:["breakfast"]},
+  {n:"Watercress Ubud", a:"Ubud", r:"bali", s:4, lat:-8.5131164, lng:115.2609062,
+   w:"On Monkey Forest road, hanging plants and woven lamps, open from seven to nine. Avocado smash and salmon on rye are the reliable orders.",
+   o:"Avo smash + long black", t:["breakfast","work"]},
+  {n:"Milk & Madu Beach Road", a:"Canggu", r:"bali", s:4, lat:-8.6555247, lng:115.1320801,
+   w:"Bright, breezy and built for a slow morning, with a supervised kids' corner if you're travelling with any. The breakfast combo bundles food, coffee and juice for about IDR 120,000 — the coffee is average, the shakshuka isn't.",
+   o:"Madu shakshuka", t:["breakfast"]},
+  {n:"Crate Cafe", a:"Pererenan", r:"bali", s:3, lat:-8.6408826, lng:115.1339577,
+   w:"Moved out of central Canggu to the rice fields and got better for it. Portions are large enough to share, the kitchen is coeliac-friendly, and the sourdough is the weak link. Come for the plate, not the cup.",
+   o:"The Frenchie, split between two", t:["breakfast"]},
+  {n:"Mimamori Cafe", a:"Labuan Bajo", r:"flores", s:4, lat:-8.4931356, lng:119.8776747,
+   w:"The best-known breakfast in town: you tick four items off a form and build your own plate for around IDR 65,000. Get there at half six or wait. Free wifi, and a room full of people planning boats.",
+   o:"Build-your-own set + cinnamon latte", t:["breakfast","work"]},
+  {n:"Batter Days", a:"Labuan Bajo", r:"flores", s:3, lat:-8.4940389, lng:119.8777244,
+   w:"Waterfront bakery with a cheap breakfast package, Flores tart and a good iced latte with palm sugar. Espresso isn't their strength and they're shut on Mondays.",
+   o:"Iced Flores latte + brownie cookie", t:["breakfast"]},
+  {n:"Gili Bliss", a:"Gili Air", r:"gili", s:3, x:"Temporarily closed — renovation", lat:-8.3574599, lng:116.0821344,
+   w:"Locally owned, a few steps from the roastery, and the pancakes are the reason to go. Bowls are large and pretty and taste much like each other.",
+   o:"Pancakes", t:["breakfast"]},
+  {n:"Nomad Couch Café", a:"Kuta Lombok", r:"lombok", s:4, lat:-8.8840471, lng:116.270321,
+   w:"Air conditioning, deep couches and a brunch menu that's a cut above the street. Closed Tuesdays, shuts at half five.",
+   o:"Avo creamy bagel", t:["breakfast","work"]},
+
+  // NOT A CAFE
+  {n:"Curtina Coffee Farm", a:"Kintamani", r:"bali", s:5, lat:-8.2627053, lng:115.2739697,
+   w:"A family plot where the grandfather planted the first seeds thirty years ago. They grow, process and roast — their neighbours' cherries too — and finish the visit with a pour-over of what you just walked through. Message ahead; the drive up from Ubud is half the point.",
+   o:"The tour, then a bag of what you tasted", t:["not a café","beans","filter"]},
+  {n:"Belantih Coffee Farm", a:"Kintamani", r:"bali", s:5, lat:-8.2438511, lng:115.2567052,
+   w:"Four hours from cherry to cup, run by the owner himself. There's a version built for roasters and café owners with cupping and hands-on quality control — worth asking for if you work in the trade.",
+   o:"Processing tour for professionals", t:["not a café","beans","filter"]},
+  {n:"Munduk Moding Plantation", a:"Munduk", r:"bali", s:4, lat:-8.2391504, lng:115.073687,
+   w:"A resort sitting on its own working plantation in the northern hills, four hours from the south. You don't have to stay the night to walk the plantation and taste what they grow at 1,100 m.",
+   o:"Plantation walk + their own roast", t:["not a café","beans"]},
+  {n:"Outpost Ubud Nyuh Kuning", a:"Ubud", r:"bali", s:4, lat:-8.5276721, lng:115.2556328,
+   w:"Open around the clock, with a quiet library downstairs, call rooms, a pool and bottomless coffee included in the day pass. The on-site café delivers to your desk.",
+   o:"Day pass, then keep the cups coming", t:["not a café","work"]},
+  {n:"Tropical Nomad Coworking", a:"Canggu", r:"bali", s:4, lat:-8.6526692, lng:115.1380273,
+   w:"Standing desks, aircon and non-aircon rooms, a garden with gazebos to lie down in, and better coffee than a coworking space needs to have. 24 hours on weekdays.",
+   o:"Flat white at a standing desk", t:["not a café","work"]},
+  {n:"Sembalun Coffee Farm", a:"Sembalun", r:"lombok", s:3, lat:-8.3643, lng:116.550899,
+   w:"High on the eastern side of Rinjani, where Lombok's arabica actually grows. Barely documented and there's no website — call first and treat it as a detour on the way to the crater rim, not a sure thing.",
+   o:"Whatever they're drying that week", t:["not a café","beans"]},
+
+  // SUMBAWA
+  {n:"Thousand Sunny Coffee & Co", a:"Sumbawa Besar", r:"sumbawa", s:5, lat:-8.5044447, lng:117.4285988,
+   w:"A hidden gem in a town where nobody expects one. The owner blends his own drinks and cooks Japanese food on the side, and will happily redraw your route across the island for you.",
+   o:"Cappuccino, then ask what else he's got", t:["filter","beans"]},
+  {n:"Casa Coffee", a:"Sumbawa Besar", r:"sumbawa", s:4, lat:-8.4815659, lng:117.4099543,
+   w:"Two floors, working aircon and the most reliable kitchen in town — a genuine relief if you've been on the road since the ferry. Don't order anything complicated if you're catching a flight.",
+   o:"Coffee upstairs, out of the heat", t:["breakfast","work"]},
+  {n:"Ambush Cafe", a:"Maluk", r:"sumbawa", s:5, lat:-8.9220854, lng:116.7556605,
+   w:"Trained baristas, premium local beans and chocolate croissants on the west coast mining road. Open from six, which matters here — nothing else is.",
+   o:"Espresso + omelette with sambal", t:["filter","breakfast"]},
+  {n:"Botabean Coffee House", a:"Taliwang", r:"sumbawa", s:4, lat:-8.757617, lng:116.8518945,
+   w:"Small, warm and good with kids, with the best croissants between here and Lombok. The butterscotch latte is the local order.",
+   o:"Americano + croissant", t:["breakfast"]},
+  {n:"IRAS Coffee", a:"Taliwang", r:"sumbawa", s:4, lat:-8.7441849, lng:116.8570303,
+   w:"Run by a young owner who clearly buys good beans — the americano comes out smooth rather than scorched, which on this island is not a given.",
+   o:"Americano", t:["filter"]},
+  {n:"Nami Restaurant Lakey Peak", a:"Hu'u · Lakey Peak", r:"sumbawa", s:4, lat:-8.8049106, lng:118.3828708,
+   w:"The heart of the Lakey surf community, right in front of the break, with a free pool table and an iced oat cappuccino that has no business being this good. Food is inconsistent; the coffee and the view aren't.",
+   o:"Iced cappuccino with oat, watching the peak", t:["breakfast"]},
+  {n:"Beeginning Coffee", a:"Bima", r:"sumbawa", s:4, lat:-8.4676587, lng:118.7644353,
+   w:"Far better than Bima has any right to have — they even import their cups from Yogyakarta. The cappuccino is the town benchmark. Closed Mondays.",
+   o:"Cappuccino + tuna melt pizza", t:["breakfast"]},
+  {n:"Boss Pojok Coffee", a:"Sape", r:"sumbawa", s:4, lat:-8.576913, lng:119.0151673,
+   w:"Two minutes from the Labuan Bajo ferry pier and full of locals. The catch: it opens at half four in the afternoon, and the Flores ferry leaves in the morning — so this is a place for the night before, not the wait itself.",
+   o:"Kopi with whoever sits down next to you", t:[]},
+  {n:"Kopi Tambora — ORI Coffee", a:"Dompu", r:"sumbawa", s:3, lat:-8.5404099, lng:118.4639188,
+   w:"A production house rather than a café, packing arabica and robusta grown on the slopes of Tambora — the volcano whose 1815 eruption gave Europe a year without a summer. Barely reviewed; go for the bag, not the cup.",
+   o:"Tambora arabica to take away", t:["not a café","beans"]},
+];
+
+const ORIGINS = [
+  {n:"Kintamani", s:"Bali · 1,200–1,500 m", d:"Arabica off the slopes of Batur, intercropped with citrus and wet-processed. Cleaner and brighter than the rest of Indonesia — citrus at the top, light body. The easiest fresh bean to find on the island."},
+  {n:"Bajawa & Manggarai", s:"Flores · 1,200–1,700 m", d:"Volcanic soil gives dense, chocolate-and-nut cups with low acidity. Colol in Manggarai and the Ngada highlands around Bajawa are the two names you'll see on bags in Labuan Bajo."},
+  {n:"Juria", s:"Flores · heirloom variety", d:"A variety tied to Flores alone, brought over generations ago and kept alive in small garden plots. Resinous, spiced sweetness. This is the bag to carry home — you won't find it anywhere else."},
+  {n:"Gayo", s:"Aceh, Sumatra · 1,100–1,600 m", d:"Indonesia's best-known export and giling basah in its purest form: herbal, cedar, syrupy body, almost no acidity. You either love it or you don't."},
+  {n:"Toraja", s:"Sulawesi · 1,400–1,900 m", d:"Spiced and darkly fruited, a touch more structured than the Sumatrans. A good bar will pour it as filter, and it's worth tasting against Gayo in the same sitting."},
+  {n:"Sembalun & Tetebatu", s:"Lombok · below Rinjani", d:"The youngest scene here. High gardens under Rinjani, small volumes, showing up mostly at local roasters in Kuta and Mataram. Ask — it rarely makes the permanent menu."}
+];
+
+
+/* Opening hours, WITA (UTC+8) — the whole guide sits in one timezone.
+   String = same every day. Array = Sun..Sat, null = closed. */
+const HOURS = {
+  "Seniman Coffee":"07:30-22:00",
+  "Expat. Roasters Petitenget":"06:30-19:00",
+  "Revolver Seminyak":"07:00-23:00",
+  "Hungry Bird Coffee Roaster":"07:00-17:00",
+  "Blacklist Coffee Roasters":"07:00-18:00",
+  "Anomali Coffee Ubud":"08:00-21:00",
+  "Sisterfields":"07:00-21:00",
+  "SUKA Uluwatu":"07:30-22:00",
+  "Watercress Ubud":"07:00-21:00",
+  "Milk & Madu Beach Road":"07:00-22:00",
+  "Crate Cafe":"06:00-22:00",
+  "Elevate Espresso Cafe & Roastery":["08:00-22:00","07:00-21:00","07:00-21:00","07:00-21:00","07:00-21:00","07:00-21:00","07:00-21:00"],
+  "kaffeekostbar (Labuan Bajo Coffee Roaster)":"08:00-18:00",
+  "Carpenter Cafe and Roastery":"06:30-22:00",
+  "KOMODOUGH Artisan Bakery & Coffee":"06:00-22:00",
+  "Mimamori Cafe":["06:30-22:00","06:30-22:00","06:30-20:00","06:30-20:00","06:30-22:00","06:30-20:00","06:30-20:00"],
+  "Batter Days":["07:30-21:00",null,"07:30-21:00","07:30-21:00","07:30-21:00","07:30-21:00","07:30-21:00"],
+  "LaBajo Flores Coffee, Komodo Airport":"00:00-24:00",
+  "Gili Coffee Roasters":["08:00-16:30","08:00-16:30","08:00-16:30","08:00-16:30","08:00-16:30","08:00-16:00","08:00-16:30"],
+  "Barefoot Blondie":"07:30-17:00",
+  "Pachamama Organic Cafe":"08:00-22:00",
+  "MAHAMAYA Gili Meno":"07:00-22:00",
+  "The Banyan Tree":"07:00-21:00",
+  "Jelajah Coffee Kuta":"07:00-19:00",
+  "MILK":"06:30-16:30",
+  "Bush Radio":"07:30-21:30",
+  "Kenza Cafe":"07:00-23:00",
+  "Satusatu Coffee Roaster":"07:00-21:00",
+  "Kupi Beans & Roastery":[null,"09:00-23:00","09:00-23:00","09:00-21:00","09:00-23:00","09:00-23:00","09:00-23:00"],
+  "Salam Rinjani Coffee":["07:30-22:00","09:00-22:00","13:00-22:00","13:00-22:00","13:00-22:00","13:00-22:00","13:00-22:00"],
+  "Goeie Coffee and Eatery":"08:00-19:00",
+  "DRUV Coffee & Eatery":"06:00-23:00",
+  "Ploni Cafe":"08:00-22:00",
+  "Casa Coffee":["08:00-23:00","08:00-22:00","08:00-22:00","08:00-22:00","08:00-22:00","08:00-22:00","08:00-23:00"],
+  "Ambush Cafe":"06:00-23:00",
+  "Botabean Coffee House":"09:00-23:00",
+  "IRAS Coffee":["10:00-23:00","10:00-23:00","10:00-23:00","10:00-23:00","10:00-23:00","16:00-23:00","10:00-23:00"],
+  "Nami Restaurant Lakey Peak":"07:00-22:00",
+  "Beeginning Coffee":["08:30-23:00",null,"08:30-23:00","08:30-23:00","08:30-23:00","13:00-23:00","08:30-23:30"],
+  "Boss Pojok Coffee":"16:30-24:00",
+  "Kopi Tambora — ORI Coffee":"09:00-18:00",
+  "Outpost Ubud Nyuh Kuning":"00:00-24:00",
+  "Tropical Nomad Coworking":["08:00-16:00","00:00-24:00","00:00-24:00","00:00-24:00","00:00-24:00","00:00-24:00","08:00-16:00"],
+  "Nomad Couch Café":["07:30-17:30","07:30-17:30",null,"07:30-17:30","07:30-17:30","07:30-17:30","07:30-17:30"]
+};
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function witaNow(){
+  const n = new Date();
+  return new Date(n.getTime() + n.getTimezoneOffset()*60000 + 8*3600000);
+}
+function mins(hhmm){ const [h,m] = hhmm.split(":").map(Number); return h*60+m; }
+function hoursFor(p, day){
+  const h = HOURS[p.n];
+  if(!h) return undefined;              // hours not published
+  return typeof h === "string" ? h : h[day];
+}
+function openState(p){
+  if(p.x) return {known:true, open:false, label:p.x};
+  const now = witaNow(), day = now.getDay(), cur = now.getHours()*60 + now.getMinutes();
+  const today = hoursFor(p, day);
+  if(today === undefined) return {known:false};
+  if(today === null) return {known:true, open:false, label:"Closed " + DAYS[day] + "s"};
+  const [o,c] = today.split("-");
+  const oM = mins(o), cM = c === "24:00" ? 1440 : mins(c);
+  const open = cur >= oM && cur < cM;
+  const label = (c === "24:00" && o === "00:00") ? "Open 24 hours"
+              : o.replace(/^0/,"") + "–" + c.replace(/^0/,"");
+  return {known:true, open, label};
+}
+
+const TAGS = ["filter","beans","breakfast","work","not a café"];
+const REGIONS = [{k:"all",l:"All"},{k:"bali",l:"Bali"},{k:"gili",l:"Gili"},{k:"lombok",l:"Lombok"},{k:"sumbawa",l:"Sumbawa"},{k:"flores",l:"Flores"}];
+const REGION_COLOR = {bali:"#F0B429", gili:"#5B9BD5", lombok:"#C58BE0", sumbawa:"#E4A0BE", flores:"#48B394"};
+
+let state = {region:"all", tag:null, q:"", openOnly:false, done:new Set()};
+let map = null, markers = [];
+
+/* storage: uses the artifact store when present, localStorage when self-hosted */
+const store = {
+  async get(k){
+    if (window.storage) { const r = await window.storage.get(k); return r ? r.value : null; }
+    return localStorage.getItem(k);
+  },
+  async set(k,v){
+    if (window.storage) return window.storage.set(k,v);
+    return localStorage.setItem(k,v);
+  }
+};
+async function loadDone(){
+  try{ const v = await store.get("kopitrip:done"); if(v) state.done = new Set(JSON.parse(v)); }
+  catch(e){ /* first run, nothing saved yet */ }
+}
+async function saveDone(){
+  try{ await store.set("kopitrip:done", JSON.stringify([...state.done])); }
+  catch(e){ console.warn("Stamp not saved:", e); }
+}
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function hoursLine(p){
+  const st = openState(p);
+  if(!st.known) return ` <em class="hrs">hours not listed</em>`;
+  if(!st.open)  return ` <em class="hrs ${p.x?"paused":"shut"}">● ${st.label}</em>`;
+  return ` <em class="hrs live">● ${st.label}</em>`;
+}
+function stars(n){ return "★".repeat(n) + (n<5 ? `<span>${"★".repeat(5-n)}</span>` : ""); }
+function mapsUrl(p){ return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.n+" "+p.a+" Indonesia"); }
+
+function renderChips(){
+  document.getElementById("regionChips").innerHTML = REGIONS.map(r=>
+    `<button class="chip" data-region="${r.k}" aria-pressed="${state.region===r.k}">${r.l}</button>`).join("");
+  document.getElementById("tagChips").innerHTML =
+    `<button class="chip open" data-open="1" aria-pressed="${state.openOnly}">● Open now</button>` +
+    TAGS.map(t=>`<button class="chip" data-tag="${t}" aria-pressed="${state.tag===t}">${t}</button>`).join("");
+}
+
+function match(p){
+  if(state.region!=="all" && p.r!==state.region) return false;
+  if(state.tag && !p.t.includes(state.tag)) return false;
+  if(state.openOnly){ const st = openState(p); if(!st.known || !st.open) return false; }
+  if(state.q){
+    const hay = (p.n+" "+p.a+" "+p.w+" "+p.o+" "+p.t.join(" ")).toLowerCase();
+    if(!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+
+function renderList(){
+  const items = PLACES.filter(match);
+  const list = document.getElementById("list");
+  if(!items.length){ list.innerHTML = `<p class="empty">Nothing matches. Try another word or clear the filter.</p>`; return; }
+  const byArea = {};
+  items.forEach(p=>{ (byArea[p.a] = byArea[p.a] || []).push(p); });
+  list.innerHTML = Object.entries(byArea).map(([area,ps])=>`
+    <div class="areahead"><h2>${esc(area)}</h2><hr><em>${ps.length}</em></div>
+    ${ps.map(p=>{
+      const done = state.done.has(p.n);
+      return `<article class="card${done?" done":""}${p.x?" paused":""}">
+        <div class="stampmark" aria-hidden="true"><b>TASTED</b>KOPI TRIP</div>
+        <h3>${esc(p.n)}</h3>
+        <p class="stars" aria-label="${p.s} out of 5">${stars(p.s)}${hoursLine(p)}</p>
+        <p class="why">${esc(p.w)}</p>
+        <p class="order"><b>Order this</b>${esc(p.o)}</p>
+        <div class="tags">${p.t.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+        <div class="row">
+          <button class="btn mark" data-name="${esc(p.n)}" aria-pressed="${done}">${done?"Remove stamp":"Stamp it"}</button>
+          <a class="btn" href="${mapsUrl(p)}" target="_blank" rel="noopener">Map</a>
+        </div>
+      </article>`;
+    }).join("")}`).join("");
+}
+
+function renderPas(){
+  document.getElementById("pasCount").textContent = state.done.size;
+  document.getElementById("pasTotal").textContent = PLACES.length;
+  document.getElementById("pasDots").innerHTML =
+    PLACES.map(p=>`<i class="${state.done.has(p.n)?"on":""}"></i>`).join("");
+}
+
+function renderOrigins(){
+  document.getElementById("origins").innerHTML = ORIGINS.map(o=>`
+    <div class="origin"><em>${esc(o.s)}</em><h3>${esc(o.n)}</h3><p>${esc(o.d)}</p></div>`).join("");
+}
+
+function initMap(){
+  if(map){ map.invalidateSize(); return; }
+  map = L.map("map", {scrollWheelZoom:false}).setView([-8.55, 117.5], 7);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution:'&copy; OpenStreetMap contributors &copy; CARTO', maxZoom:19
+  }).addTo(map);
+  PLACES.forEach(p=>{
+    const icon = L.divIcon({
+      className:"", iconSize:[15,15], iconAnchor:[7,14],
+      html:`<div class="pin" style="background:${REGION_COLOR[p.r]}"></div>`
+    });
+    const m = L.marker([p.lat,p.lng],{icon}).addTo(map);
+    const st = openState(p);
+    m.bindPopup(`<b>${esc(p.n)}</b><br>${esc(p.a)} · ${"★".repeat(p.s)}<br>
+      ${st.known ? (st.open ? "Open now · " : "Closed · ") + esc(st.label) : "Hours not listed"}<br>${esc(p.o)}<br>
+      <a href="${mapsUrl(p)}" target="_blank" rel="noopener">Open in Maps</a>`);
+    markers.push(m);
+  });
+  map.fitBounds(L.latLngBounds(PLACES.map(p=>[p.lat,p.lng])).pad(0.15));
+}
+
+document.addEventListener("click", async (e)=>{
+  const r = e.target.closest("[data-region]");
+  if(r){ state.region = r.dataset.region; renderChips(); renderList(); return; }
+  const ob = e.target.closest("[data-open]");
+  if(ob){ state.openOnly = !state.openOnly; renderChips(); renderList(); return; }
+  const t = e.target.closest("[data-tag]");
+  if(t){ state.tag = (state.tag === t.dataset.tag) ? null : t.dataset.tag; renderChips(); renderList(); return; }
+  const m = e.target.closest(".btn.mark");
+  if(m){
+    const name = m.dataset.name;
+    state.done.has(name) ? state.done.delete(name) : state.done.add(name);
+    renderList(); renderPas(); saveDone(); return;
+  }
+  const tab = e.target.closest(".tab");
+  if(tab){
+    document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected", x===tab));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on", p.id===tab.dataset.panel));
+    window.scrollTo({top:0,behavior:"smooth"});
+    if(tab.dataset.panel==="p-map") setTimeout(initMap, 60);
+  }
+});
+
+document.getElementById("q").addEventListener("input", e=>{
+  state.q = e.target.value.trim().toLowerCase();
+  renderList();
+});
+
+(async function init(){
+  renderChips(); renderOrigins();
+  await loadDone();
+  renderList(); renderPas();
+})();
+</script>
+</body>
+</html>

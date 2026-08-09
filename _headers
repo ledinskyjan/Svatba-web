@@ -1,0 +1,7 @@
+/kopi-trip
+  Cache-Control: no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow
+
+/kopi-trip/*
+  Cache-Control: no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow
